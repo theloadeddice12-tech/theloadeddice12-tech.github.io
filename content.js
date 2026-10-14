@@ -46,7 +46,7 @@ var POSTS = [
       "Start with a fabric that has history: aso-oke, lace, adire, ankara or brocade. Then make it sharp. A tailored agbada with a structured hat. A corset buba with a statement sleeve. A gele tied like you have somewhere important to be.",
       "The room is a Lagos night, so think in black, oxblood red and gold, with one loud piece. Beads, brass cuffs, big earrings and a good bag do a lot of talking.",
       "Remember the story too. Everyone in the room is a suspect, so dress like someone with a secret and a good alibi. Stripes and sunglasses work for the calm and cool. Velvet and beads work for the dramatic.",
-      "You will be on your feet and moving between corners of the room, so let your shoes be comfortable and stylish at the same time.",
+      "You will be on your feet, so let your shoes be comfortable and stylish at the same time.",
       "Part two is coming soon."
     ]
   },
@@ -54,13 +54,11 @@ var POSTS = [
     id: "what-to-expect",
     title: "What to expect at Èkó After Dark",
     date: "October 2026",
-    summary: "Squads, secrets, 90 seconds with a suspect and one chance to name the killer.",
+    summary: "Collect your tag, join your team and expect a night with a twist.",
     body: [
-      "You arrive, pick up a bead colour and meet your squad. Six squads share the room, and each one starts in a different corner.",
-      "The night begins as a dinner party. Enjoy it while it lasts. Before long, something goes terribly wrong, and every person in the room is a suspect.",
-      "To question a suspect, your squad wins a quick challenge. A trivia question, a riddle or a mini-game gets you 90 seconds with them. You only get three attempts for the whole night, so choose carefully.",
-      "You cannot reach every suspect yourselves. Every squad also sees something different, so trade clues with other squads and work out who is telling the truth.",
-      "At the end you hand in your verdict. The host reveals who did it.",
+      "Arrive, collect your tag and join your team. From that moment, you are on the case.",
+      "The night begins as a dinner party. Eat, drink, dance and play. Just do not get too comfortable, because this night comes with a twist.",
+      "Pay attention, talk to everyone and trust no one. By the end, you will be asked one question: who did it?",
       "Bring friends you can trust. Or don't."
     ]
   }
