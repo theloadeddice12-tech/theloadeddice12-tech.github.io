@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Loaded Dice</title>
+
+
+<meta name="description" content="Lagos' first roving murder mystery party. Your friends are suspects. Trust no one.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Albert+Sans:wght@400;500;600;700;800&family=Special+Elite&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: a Lagos case file. A dark night page with a spotlight hero, danfo-yellow crime tape as the section glue,
+   adire/aso-oke diamond bands as dividers, and the archive laid out as an evidence board pinned with red string. */
+:root{
+  --ink:#0b0707;
+  --ink-2:#140b0c;
+  --ink-3:#1f1213;
+  --fg:#f4ece0;
+  --muted:#c0b2a0;
+  --gold:#d6ab52;
+  --gold-hi:#f2d58c;
+  --blood:#a31c27;
+  --blood-hi:#e03545;
+  --tape:#ffc61a;
+  --tape-ink:#120d08;
+  --paper:#eadfc8;
+  --paper-ink:#1a1410;
+  --line:rgba(214,171,82,.32);
+  --f-display:'Abril Fatface','Bodoni 72',Georgia,serif;
+  --f-body:'Albert Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-type:'Special Elite','Courier New',monospace;
+  --f-hand:'Permanent Marker','Segoe Print','Comic Sans MS',cursive;
+  --band:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='24'%3E%3Crect width='48' height='24' fill='%230b0707'/%3E%3Cpath d='M0 12 L12 0 L24 12 L12 24Z' fill='none' stroke='%23d6ab52' stroke-width='1.5'/%3E%3Cpath d='M24 12 L36 0 L48 12 L36 24Z' fill='%23a31c27'/%3E%3Ccircle cx='12' cy='12' r='2.5' fill='%23d6ab52'/%3E%3Ccircle cx='36' cy='12' r='2.5' fill='%23ffc61a'/%3E%3C/svg%3E");
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.05;margin:0;text-wrap:balance}
+p{margin:0}
+:focus-visible{outline:3px solid var(--tape);outline-offset:3px}
+.in{width:100%;max-width:1200px;margin-left:auto;margin-right:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 24px;border:2px solid var(--blood);background:var(--blood);color:#fff;font:700 16px/1.2 var(--f-body);text-decoration:none;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+.btn:hover{background:var(--blood-hi);border-color:var(--blood-hi)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;border-color:var(--gold);color:var(--gold-hi)}
+.btn.ghost:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.btn.small{min-height:40px;padding:8px 16px;font-size:15px}
+.btn svg{width:20px;height:20px;flex-shrink:0}
+
+/* header */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(11,7,7,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .in{display:flex;align-items:center;gap:20px;min-height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:400 22px/1 var(--f-display);color:var(--gold-hi);white-space:nowrap}
+.brand svg{width:30px;height:30px}
+.links{display:flex;gap:4px;margin-left:auto;align-items:center}
+.links a{padding:10px 12px;text-decoration:none;font-weight:600;font-size:15px;color:var(--muted)}
+.links a:hover{color:var(--gold-hi)}
+.menu-btn{display:none;margin-left:auto;background:none;border:2px solid var(--gold);color:var(--gold-hi);font:700 15px var(--f-body);padding:8px 14px;min-height:44px;cursor:pointer}
+@media(max-width:980px){
+  .menu-btn{display:inline-flex;align-items:center}
+  .nav .tick-btn{display:none}
+  .links{display:none;position:absolute;left:0;right:0;top:100%;flex-direction:column;align-items:stretch;gap:0;background:var(--ink);border-bottom:1px solid var(--line);padding:8px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
+  .links.open{display:flex}
+  .links a{padding:14px 4px;border-bottom:1px solid rgba(214,171,82,.15);font-size:17px}
+  .links .btn{margin-top:12px}
+}
+
+/* tape */
+.tape-edge{height:18px;background:repeating-linear-gradient(-45deg,var(--tape) 0 20px,var(--tape-ink) 20px 40px)}
+.tape{background:var(--tape);color:var(--tape-ink);overflow:hidden;white-space:nowrap;border-block:3px solid var(--tape-ink);transform:rotate(-1.2deg);margin-left:-3%;margin-right:-3%;position:relative;z-index:3}
+.tape.rev{transform:rotate(1.2deg);background:var(--ink-3);color:var(--tape);border-color:var(--tape)}
+.track{display:inline-flex;width:max-content;animation:slide 38s linear infinite}
+.tape.rev .track{animation-direction:reverse;animation-duration:46s}
+.track span{padding:10px 0;font:800 17px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase}
+.track span::after{content:"//";padding:0 1.1em;opacity:.7}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* hero */
+.hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 78% 30%,#3a0d12 0,var(--ink) 62%);padding-block:56px 110px;isolation:isolate}
+.hero-art{position:absolute;inset:0 0 0 auto;width:min(64%,820px);z-index:-2;opacity:.9}
+.hero-art img{width:100%;height:100%;object-fit:cover;-webkit-mask-image:linear-gradient(to left,#000 45%,transparent 100%);mask-image:linear-gradient(to left,#000 45%,transparent 100%)}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle 420px at var(--mx,74%) var(--my,32%),transparent 0,rgba(5,2,2,.62) 78%)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:24px;align-items:center}
+.hero h1{font-size:clamp(46px,7.2vw,96px);letter-spacing:-.01em;color:var(--fg)}
+.hero h1 em{display:block;font-style:normal;color:var(--gold-hi)}
+.hero .lead{margin-top:22px;max-width:30em;font-size:clamp(18px,2vw,21px);color:var(--fg)}
+.hero .lead strong{color:var(--gold-hi);font-weight:700}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.countdown{margin-top:30px;display:inline-flex;align-items:center;gap:14px;border:1px dashed var(--gold);padding:10px 18px;background:rgba(11,7,7,.6)}
+.countdown b{font:400 44px/1 var(--f-display);color:var(--tape);font-variant-numeric:tabular-nums}
+.countdown span{font-size:15px;color:var(--muted);line-height:1.3}
+.hero-logo{justify-self:center;width:min(100%,560px);filter:drop-shadow(0 20px 50px rgba(0,0,0,.7))}
+.hero-tape{position:absolute;left:0;right:0;bottom:30px;z-index:3}
+@media(max-width:820px){
+  .hero{padding-block:28px 100px}
+  .hero-grid{grid-template-columns:1fr}
+  .hero-logo{width:min(78%,360px);grid-row:1}
+  .hero-art{width:100%;opacity:.5}
+  .hero-art img{-webkit-mask-image:linear-gradient(to bottom,#000 30%,transparent 100%);mask-image:linear-gradient(to bottom,#000 30%,transparent 100%)}
+}
+
+/* sections */
+.band{padding-block:84px}
+.band h2{font-size:clamp(36px,5vw,64px)}
+.band .sub{color:var(--muted);max-width:38em;margin-top:16px}
+.divider{height:24px;background:var(--band) repeat-x 0 0/48px 24px;border-block:1px solid var(--line)}
+.head{display:grid;gap:4px;margin-bottom:44px}
+
+/* open case */
+#case{background:linear-gradient(180deg,var(--ink) 0,var(--ink-2) 100%)}
+.case{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(28px,5vw,72px);align-items:center}
+.poster{position:relative;justify-self:center;width:min(100%,430px);transform:rotate(-2.2deg);box-shadow:0 30px 60px rgba(0,0,0,.6);border:8px solid var(--paper);background:var(--paper)}
+.poster::before{content:"";position:absolute;top:-14px;left:50%;width:120px;height:30px;margin-left:-60px;background:rgba(255,198,26,.85);transform:rotate(3deg);z-index:2}
+.poster img{width:100%}
+.case-copy h2{font-size:clamp(44px,6.4vw,86px)}
+.case-copy .sub2{font:600 20px/1.3 var(--f-body);color:var(--gold-hi);margin-top:10px}
+.facts{margin:30px 0 0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.facts div{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.facts dt{font:400 15px/1.5 var(--f-type);color:var(--gold)}
+.facts dd{margin:0;font-weight:500}
+.facts dd small{display:block;color:var(--muted);font-size:15px}
+.facts a{color:var(--gold-hi)}
+.price{font:400 32px/1 var(--f-display);color:var(--tape)}
+@media(max-width:820px){.case{grid-template-columns:1fr}.poster{width:min(86%,380px)}.facts div{grid-template-columns:1fr;gap:2px}}
+
+/* how */
+#how{background:var(--ink-2)}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+.steps li{position:relative;padding:22px 18px 24px;background:var(--ink-3);border-top:4px solid var(--blood)}
+.steps li:nth-child(even){border-top-color:var(--gold)}
+.steps .n{font:400 54px/1 var(--f-display);color:var(--tape);display:block;margin-bottom:12px}
+.steps h3{font:700 20px/1.2 var(--f-body);margin-bottom:8px}
+.steps p{font-size:16px;color:var(--muted)}
+@media(max-width:1000px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.steps li:last-child{grid-column:span 2}}
+@media(max-width:600px){.steps{grid-template-columns:1fr}.steps li:last-child{grid-column:auto}}
+
+/* archive / evidence board */
+#archive{background:var(--ink)}
+.board{position:relative;padding:56px clamp(16px,3vw,40px) 48px;background:
+  radial-gradient(circle at 20% 10%,rgba(163,28,39,.16),transparent 50%),
+  radial-gradient(circle at 85% 80%,rgba(214,171,82,.1),transparent 45%),var(--ink-2);
+  border:1px solid var(--line)}
+.board-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3vw,44px);align-items:start}
+.string{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
+.string path{fill:none;stroke:var(--blood-hi);stroke-width:2.5;stroke-linecap:round;filter:drop-shadow(0 3px 3px rgba(0,0,0,.6))}
+.file{position:relative;background:var(--paper);color:var(--paper-ink);padding:34px 22px 24px;box-shadow:0 14px 30px rgba(0,0,0,.5);min-width:0}
+.file:nth-child(1){transform:rotate(-1.8deg)}
+.file:nth-child(2){transform:rotate(1.2deg);margin-top:22px}
+.file:nth-child(3){transform:rotate(-.8deg);margin-top:8px}
+.pin{position:absolute;top:10px;left:50%;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff7a85,var(--blood) 60%,#5a0c14);box-shadow:0 3px 5px rgba(0,0,0,.5);z-index:4}
+.stamp{position:absolute;top:30px;right:14px;transform:rotate(9deg);font:400 15px/1 var(--f-type);padding:5px 9px;border:3px solid;letter-spacing:.06em;text-transform:uppercase;background:rgba(234,223,200,.7)}
+.stamp.closed{color:#7d1219;border-color:#7d1219}
+.stamp.open{color:#0d5a2a;border-color:#0d5a2a}
+.stamp.secret{color:#222;border-color:#222}
+.file h3{font-size:30px;margin-top:22px;color:var(--paper-ink)}
+.file .meta{font:400 15px/1.45 var(--f-type);margin-top:8px;color:#4a3a2a}
+.file p.blurb{margin-top:14px;font-size:16px;line-height:1.55}
+.file .btn{margin-top:18px;color:#fff}
+.file .btn.ghost{color:var(--paper-ink);border-color:var(--paper-ink)}
+.file .btn.ghost:hover{background:var(--paper-ink);color:var(--paper)}
+.file .note{margin-top:18px;font-size:15px;color:#4a3a2a}
+.file .note a{color:#7d1219;font-weight:700}
+.redact{background:#111;color:#111;padding:0 .2em;user-select:none}
+.scribble{font:400 22px/1.2 var(--f-hand);color:var(--blood-hi);margin-top:26px;text-align:right;transform:rotate(-2deg)}
+@media(max-width:900px){.board-grid{grid-template-columns:1fr;gap:34px}.file:nth-child(n){margin-top:0}}
+
+/* dress */
+#dress{background:linear-gradient(180deg,var(--ink) 0,#1a0a0d 100%)}
+.dress{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(28px,5vw,72px);align-items:center}
+.look{position:relative;justify-self:center;width:min(100%,460px);transform:rotate(1.6deg);border:8px solid var(--paper);box-shadow:0 30px 60px rgba(0,0,0,.6);background:var(--paper)}
+.look::after{content:"Part one";position:absolute;right:-14px;bottom:26px;transform:rotate(-4deg);background:var(--tape);color:var(--tape-ink);font:400 24px/1 var(--f-hand);padding:8px 14px}
+.tips{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:14px}
+.tips li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:14px}
+.tips svg{width:26px;height:26px;margin-top:3px;color:var(--gold)}
+.tips b{display:block;font-weight:700;color:var(--gold-hi)}
+.tips span{color:var(--muted);font-size:16px}
+.dress .cta-row{margin-top:30px}
+@media(max-width:820px){.dress{grid-template-columns:1fr}.look{width:min(86%,380px)}}
+
+/* journal */
+#journal{background:var(--ink-2)}
+.posts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.post{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:28px;background:var(--ink-3);border:1px solid var(--line);text-align:left;color:var(--fg);font:inherit;cursor:pointer;min-width:0;width:100%}
+.post:hover{border-color:var(--gold)}
+.post time{font:400 15px/1 var(--f-type);color:var(--gold)}
+.post h3{font-size:30px}
+.post p{color:var(--muted);font-size:16px}
+.post .more{margin-top:auto;padding-top:8px;font-weight:700;color:var(--gold-hi);border-bottom:2px solid var(--gold);align-self:flex-start}
+.empty{margin-top:24px;color:var(--muted);font-size:16px}
+@media(max-width:760px){.posts{grid-template-columns:1fr}}
+.reader{position:fixed;inset:0;z-index:100;background:rgba(5,2,2,.88);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.reader[hidden]{display:none}
+.reader-card{position:relative;width:100%;max-width:720px;background:var(--paper);color:var(--paper-ink);padding:clamp(24px,5vw,56px);margin-block:auto}
+.reader-card h2{font-size:clamp(32px,5vw,52px);color:var(--paper-ink)}
+.reader-card time{display:block;margin-bottom:14px;font:400 15px/1 var(--f-type);color:#6b2a2a}
+.reader-card .body{margin-top:24px;display:grid;gap:16px;font-size:18px;line-height:1.7}
+.reader-card .x{position:absolute;top:10px;right:10px;min-height:44px;padding:8px 14px;background:var(--paper-ink);color:var(--paper);border:0;font:700 15px var(--f-body);cursor:pointer}
+
+/* store */
+#store{background:var(--ink)}
+.bags{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.bag{position:relative;background:var(--ink-3);border:1px solid var(--line);padding:0 0 22px;text-align:center;overflow:hidden}
+.bag::before{content:"";display:block;height:22px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.12) 0 6px,transparent 6px 12px);border-bottom:1px solid var(--line)}
+.bag .label{margin:14px auto 0;width:max-content;max-width:90%;padding:3px 10px;border:2px solid var(--blood-hi);color:var(--blood-hi);font:400 14px/1.2 var(--f-type);letter-spacing:.08em;text-transform:uppercase}
+.bag svg{display:block;width:96px;height:96px;margin:22px auto 14px;color:var(--gold)}
+.bag h3{font:700 19px/1.2 var(--f-body)}
+.bag p{color:var(--muted);font-size:15px;margin-top:4px}
+.bag .soon{display:inline-block;margin-top:14px;padding:5px 14px;background:var(--tape);color:var(--tape-ink);font:800 13px/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase}
+.store-cta{margin-top:34px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.store-cta p{color:var(--muted);max-width:32em}
+@media(max-width:900px){.bags{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* about */
+#about{background:var(--ink-2)}
+.about{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:clamp(28px,5vw,72px);align-items:center}
+.about p+p{margin-top:16px}
+.about .big{font:400 clamp(22px,2.6vw,30px)/1.35 var(--f-display);color:var(--gold-hi);margin-bottom:22px}
+.about img{justify-self:center;width:min(100%,380px);border:1px solid var(--line)}
+@media(max-width:820px){.about{grid-template-columns:1fr}.about img{width:min(70%,300px);grid-row:1}}
+
+/* join */
+#join{background:linear-gradient(180deg,var(--ink-2) 0,#1b0b0e 100%)}
+.chan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.chan>*{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:28px;background:var(--ink-3);border:1px solid var(--line);text-decoration:none;min-width:0}
+.chan a:hover{border-color:var(--gold)}
+.chan svg.ic{width:34px;height:34px;color:var(--gold)}
+.chan h3{font:400 28px/1.1 var(--f-display)}
+.chan p{color:var(--muted);font-size:16px}
+.chan .go{margin-top:auto;padding-top:8px;font-weight:700;color:var(--gold-hi);border-bottom:2px solid var(--gold);align-self:flex-start}
+.mailbox{font:400 17px/1.4 var(--f-type);color:var(--gold-hi);word-break:break-all;user-select:all}
+.mail-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:8px}
+@media(max-width:900px){.chan{grid-template-columns:1fr}}
+
+/* footer */
+footer{background:var(--ink);padding-block:48px 40px}
+.foot{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:32px}
+.foot h4{margin:0 0 10px;font:400 20px/1 var(--f-display);color:var(--gold-hi)}
+.foot ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.foot a{color:var(--muted);text-decoration:none}
+.foot a:hover{color:var(--gold-hi)}
+.foot p{color:var(--muted);font-size:16px}
+.legal{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;color:var(--muted);font-size:15px}
+.legal .till{font:400 18px/1 var(--f-hand);color:var(--tape)}
+@media(max-width:820px){.foot{grid-template-columns:1fr}}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .track{animation:none}
+  .btn,.btn:active{transition:none;transform:none}
+}
+</style>
+
+</head>
+<body>
+<header class="nav">
+  <div class="in">
+    <a class="brand" href="#top" aria-label="The Loaded Dice, home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="6" fill="#a31c27" stroke="#d6ab52" stroke-width="2"/><circle cx="10" cy="10" r="2.6" fill="#f2d58c"/><circle cx="22" cy="10" r="2.6" fill="#f2d58c"/><circle cx="16" cy="16" r="2.6" fill="#f2d58c"/><circle cx="10" cy="22" r="2.6" fill="#f2d58c"/><circle cx="22" cy="22" r="2.6" fill="#f2d58c"/></svg>
+      The Loaded Dice
+    </a>
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="links">Menu</button>
+    <nav class="links" id="links" aria-label="Main">
+      <a href="#case">The case</a>
+      <a href="#how">How it works</a>
+      <a href="#archive">Case files</a>
+      <a href="#dress">Dress code</a>
+      <a href="#journal">Journal</a>
+      <a href="#store">Store</a>
+      <a href="#join">Join us</a>
+      <a class="btn small tick-btn" data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Get tickets</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero" id="hero">
+  <div class="hero-art"><img src="hero-dice.webp" alt="" width="1100" height="1100"></div>
+  <div class="in hero-grid">
+    <div>
+      <h1>Your friends are suspects.<em>Trust no one.</em></h1>
+      <p class="lead">Lagos' first roving murder mystery party. <strong>A party, games and a crime scene.</strong> A new venue and a new victim each time, in a room full of people who swear they didn't do it.</p>
+      <div class="cta-row">
+        <a class="btn" data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Get tickets for Èkó After Dark</a>
+        <a class="btn ghost" data-link="whatsapp" href="https://chat.whatsapp.com/KDs0jEbpfRT4gBWcntghli" target="_blank" rel="noopener">Join the Loaded Tribe</a>
+      </div>
+      <div class="countdown" id="countdown" aria-live="off">
+        <b id="days">24</b>
+        <span id="dayslabel">days until the lights go out<br>on Saturday, 7 November</span>
+      </div>
+    </div>
+    <img class="hero-logo" src="logo-gold.webp" alt="The Loaded Dice logo: gold lettering above two red dice" width="900" height="900">
+  </div>
+  <div class="hero-tape" aria-hidden="true">
+    <div class="tape"><div class="track" id="trackA"></div></div>
+  </div>
+</section>
+
+<div class="divider" role="presentation"></div>
+
+<section class="band" id="case">
+  <div class="in case">
+    <div class="poster"><img src="poster-portrait.webp" alt="Èkó After Dark poster: a woman in a red gele looking over Lagos lagoon at dusk, with a table of dice, a mask and crime-scene photos" width="900" height="1125"></div>
+    <div class="case-copy">
+      <h2>Èkó After Dark</h2>
+      <p class="sub2">An Ìsàlẹ̀ Èkó Special</p>
+      <p class="sub" style="margin-top:20px;max-width:32em">A cooperative's annual dinner. The lights go out for two minutes. When they come back, one financial secretary won't make it to the handover speech, and everybody in the room has a secret worth killing for.</p>
+      <dl class="facts">
+        <div><dt>When</dt><dd>Saturday, 7 November 2026</dd></div>
+        <div><dt>Where</dt><dd>Adrenaline Lounge<small>49 Lawani Street, Akoka, Yaba, Lagos. <a id="mapLink" href="https://www.google.com/maps/search/?api=1&amp;query=Adrenaline+Lounge+49+Lawani+Street+Akoka+Yaba+Lagos" target="_blank" rel="noopener">Open in Maps</a></small></dd></div>
+        <div><dt>Tickets</dt><dd><span class="price">₦7,500</span> early bird<small>Goes up to ₦10,000 for standard tickets.</small></dd></div>
+        <div><dt>Wear</dt><dd>Trendy traditional Nigerian. Dress to impress.</dd></div>
+      </dl>
+      <div class="cta-row">
+        <a class="btn" data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Get tickets</a>
+        <a class="btn ghost" href="#how">How the night works</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tape-edge" role="presentation"></div>
+
+<section class="band" id="how">
+  <div class="in">
+    <div class="head">
+      <h2>How a night works</h2>
+      <p class="sub">You are not watching a murder mystery. You are in one, with a squad, a clock and a room full of liars.</p>
+    </div>
+    <ol class="steps">
+      <li><span class="n">1</span><h3>Find your squad</h3><p>You arrive, get a bead colour and join one of six squads. Each squad owns a corner of the room.</p></li>
+      <li><span class="n">2</span><h3>Dinner, then darkness</h3><p>The party starts. Then the power goes out. When the lights return, there is a body on the stage.</p></li>
+      <li><span class="n">3</span><h3>Question the suspects</h3><p>Win a quick challenge and earn 90 seconds with a suspect. Your squad only gets three tries all night.</p></li>
+      <li><span class="n">4</span><h3>Trade what you saw</h3><p>Every squad caught a different piece of the blackout. Swap clues with other squads, and choose carefully who you trust.</p></li>
+      <li><span class="n">5</span><h3>Name the killer</h3><p>Hand in your verdict. The host reveals who did it, and which squad saw it coming.</p></li>
+    </ol>
+  </div>
+</section>
+
+<div class="divider" role="presentation"></div>
+
+<section class="band" id="archive">
+  <div class="in">
+    <div class="head">
+      <h2>Case files</h2>
+      <p class="sub">Every night we've thrown and every body we've dropped, pinned to the board.</p>
+    </div>
+    <div class="board" id="board">
+      <svg class="string" id="string" aria-hidden="true"></svg>
+      <div class="board-grid" id="boardGrid"></div>
+      <p class="scribble">Who is next?</p>
+    </div>
+  </div>
+</section>
+
+<div class="tape-edge" role="presentation"></div>
+
+<section class="band" id="dress">
+  <div class="in dress">
+    <div class="look"><img src="lookbook.webp" alt="A collage of guests in trendy traditional Nigerian outfits: geles, lace, agbada, aso-oke and beads, in red, black and gold" width="900" height="1125" loading="lazy"></div>
+    <div>
+      <h2>What do I wear?</h2>
+      <p class="sub" style="max-width:30em">Trendy traditional Nigerian. Dress to impress. Everyone in the room is a suspect, so dress like someone with something to hide.</p>
+      <ul class="tips">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 9-9 9-9-9z"/></svg><div><b>Start with the fabric</b><span>Aso-oke, lace, adire, ankara or brocade, cut sharp.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><b>Think night in Lagos</b><span>Black, oxblood red and gold, with one loud piece.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18c0-6 3-11 8-11s8 5 8 11z"/><path d="M2 18h20"/></svg><div><b>Finish like a suspect</b><span>A gele, a statement hat, beads, brass cuffs and a good bag.</span></div></li>
+      </ul>
+      <div class="cta-row">
+        <button class="btn ghost" type="button" data-post="what-to-wear-part-one">Read the style guide</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider" role="presentation"></div>
+
+<section class="band" id="journal">
+  <div class="in">
+    <div class="head">
+      <h2>The journal</h2>
+      <p class="sub">Behind-the-scenes notes, style guides and stories from the nights we throw.</p>
+    </div>
+    <div class="posts" id="posts"></div>
+    <p class="empty">New posts land here first. Follow us on Instagram to hear when.</p>
+  </div>
+</section>
+
+<div class="tape-edge" role="presentation"></div>
+
+<section class="band" id="store">
+  <div class="in">
+    <div class="head">
+      <h2>The evidence locker</h2>
+      <p class="sub">Proof you survived the night. Merch for the detectives who solved it and the ones who didn't.</p>
+    </div>
+    <div class="bags">
+      <div class="bag"><span class="label">Evidence</span>
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M20 8 L8 16 L14 26 L20 22 V56 H44 V22 L50 26 L56 16 L44 8 C42 12 38 14 32 14 C26 14 22 12 20 8 Z"/></svg>
+        <h3>Shirts</h3><p>For the whole squad</p><span class="soon">Coming soon</span></div>
+      <div class="bag"><span class="label">Evidence</span>
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M22 8 C22 14 26 18 32 18 C38 18 42 14 42 8 L52 14 L58 28 L50 31 L46 24 V56 H18 V24 L14 31 L6 28 L12 14 Z"/><path d="M24 40 H40"/></svg>
+        <h3>Hoodies</h3><p>For the long walk home</p><span class="soon">Coming soon</span></div>
+      <div class="bag"><span class="label">Evidence</span>
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M10 38 C10 24 20 16 32 16 C44 16 54 24 54 38 Z"/><path d="M54 38 C60 38 62 40 62 42 H30 C36 42 46 40 54 38 Z"/></svg>
+        <h3>Caps</h3><p>Keep your face hidden</p><span class="soon">Coming soon</span></div>
+      <div class="bag"><span class="label">Evidence</span>
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M14 18 H44 V46 C44 52 40 56 34 56 H24 C18 56 14 52 14 46 Z"/><path d="M44 24 H50 C54 24 56 28 56 32 C56 36 54 40 50 40 H44"/></svg>
+        <h3>Cups</h3><p>Handle with care</p><span class="soon">Coming soon</span></div>
+    </div>
+    <div class="store-cta">
+      <a class="btn" data-link="emailMerch" href="mailto:theloadeddice12@gmail.com?subject=Tell%20me%20when%20the%20merch%20drops">Tell me when it drops</a>
+      <p>Email us and we will message you the day the first drop opens.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider" role="presentation"></div>
+
+<section class="band" id="about">
+  <div class="in about">
+    <div>
+      <h2>Who we are</h2>
+      <p class="big" style="margin-top:20px">Lagos' first roving murder mystery party.</p>
+      <p>The Loaded Dice started with Rotimi and Precious, one show and one dinner table turned crime scene. Now it is a team chasing something bigger: more magic, more shows, more nights where the dice get loaded and nobody sees it coming.</p>
+      <p>Every episode lands at a different venue with a new story, a new cast of suspects and a new crime scene, written for Lagos and played by people who love it. We are a Diversity Nights production.</p>
+    </div>
+    <img src="dice-logo-dark.webp" alt="Two glowing red dice with gold pips on a dark red background" width="800" height="800" loading="lazy">
+  </div>
+</section>
+
+<div class="tape-edge" role="presentation"></div>
+
+<section class="band" id="join">
+  <div class="in">
+    <div class="head">
+      <h2>Join the Loaded Tribe</h2>
+      <p class="sub">We tell the tribe the date before the poster drops. Pick where you want to hear it.</p>
+    </div>
+    <div class="chan">
+      <a href="https://chat.whatsapp.com/KDs0jEbpfRT4gBWcntghli" data-link="whatsapp" target="_blank" rel="noopener">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>
+        <h3>WhatsApp community</h3><p>First access to dates and tickets, plus the gist after every night.</p><span class="go">Join on WhatsApp</span>
+      </a>
+      <a href="https://www.instagram.com/the_loadeddice" data-link="instagram" target="_blank" rel="noopener">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+        <h3>Instagram</h3><p>Teasers, behind-the-scenes and photos from the night at @the_loadeddice.</p><span class="go">Follow @the_loadeddice</span>
+      </a>
+      <div>
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 7 9-7"/></svg>
+        <h3>Email us</h3><p>Questions, group bookings, venues, press or a story idea.</p>
+        <span class="mailbox" id="mailbox">theloadeddice12@gmail.com</span>
+        <div class="mail-actions">
+          <button class="btn small ghost" type="button" id="copyMail">Copy address</button>
+          <a class="btn small" data-link="email" href="mailto:theloadeddice12@gmail.com">Open email app</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="tape-edge" role="presentation"></div>
+<footer>
+  <div class="in">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="6" fill="#a31c27" stroke="#d6ab52" stroke-width="2"/><circle cx="10" cy="10" r="2.6" fill="#f2d58c"/><circle cx="22" cy="10" r="2.6" fill="#f2d58c"/><circle cx="16" cy="16" r="2.6" fill="#f2d58c"/><circle cx="10" cy="22" r="2.6" fill="#f2d58c"/><circle cx="22" cy="22" r="2.6" fill="#f2d58c"/></svg>The Loaded Dice</a>
+        <p style="margin-top:12px">A party, games and a crime scene.<br>Next case: Èkó After Dark, 7 November 2026.<br>Adrenaline Lounge, 49 Lawani Street, Akoka, Yaba.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="#case">The case</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#archive">Case files</a></li>
+          <li><a href="#journal">Journal</a></li>
+          <li><a href="#store">Store</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Find us</h4>
+        <ul>
+          <li><a data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Tickets</a></li>
+          <li><a data-link="whatsapp" href="https://chat.whatsapp.com/KDs0jEbpfRT4gBWcntghli" target="_blank" rel="noopener">WhatsApp community</a></li>
+          <li><a data-link="instagram" href="https://www.instagram.com/the_loadeddice" target="_blank" rel="noopener">Instagram</a></li>
+          <li><a href="#join">Email</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal"><span>© 2026 The Loaded Dice, Lagos. A Diversity Nights production.</span><span class="till">Lagos till we die.</span></div>
+  </div>
+</footer>
+
+<div class="reader" id="reader" hidden role="dialog" aria-modal="true" aria-labelledby="readerTitle">
+  <article class="reader-card">
+    <button class="x" type="button" id="readerClose">Close</button>
+    <time id="readerDate"></time>
+    <h2 id="readerTitle"></h2>
+    <div class="body" id="readerBody"></div>
+  </article>
+</div>
+
+<script src="content.js"></script>
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  /* links kept in one place */
+  $$('[data-link]').forEach(function(a){
+    var k=a.getAttribute('data-link');
+    if(k==='emailMerch'){a.href='mailto:'+LINKS.email+'?subject='+encodeURIComponent('Tell me when the merch drops');return}
+    if(k==='email'){a.href='mailto:'+LINKS.email;return}
+    if(LINKS[k]) a.href=LINKS[k];
+  });
+  $('#mailbox').textContent=LINKS.email;
+
+  /* tape text */
+  var tapeText=['Èkó After Dark','Saturday 7 November','Adrenaline Lounge, Yaba','A party, games and a crime scene','Trust no one'];
+  var html='';for(var i=0;i<4;i++){tapeText.forEach(function(t){html+='<span>'+t+'</span>'})}
+  $('#trackA').innerHTML=html;
+
+  /* mobile menu */
+  var mb=$('#menuBtn'),lk=$('#links');
+  mb.addEventListener('click',function(){var o=lk.classList.toggle('open');mb.setAttribute('aria-expanded',o);mb.textContent=o?'Close':'Menu'});
+  $$('#links a').forEach(function(a){a.addEventListener('click',function(){lk.classList.remove('open');mb.setAttribute('aria-expanded','false');mb.textContent='Menu'})});
+
+  /* countdown, in whole days (Lagos time) */
+  function days(){
+    var p=NEXT_EVENT_DATE.split('-'),now=new Date();
+    var lagos=new Date(now.getTime()+(60+now.getTimezoneOffset())*60000);
+    var a=Date.UTC(lagos.getFullYear(),lagos.getMonth(),lagos.getDate());
+    var b=Date.UTC(+p[0],+p[1]-1,+p[2]);
+    return Math.round((b-a)/86400000);
+  }
+  var d=days(),dEl=$('#days'),lEl=$('#dayslabel');
+  if(d>1){dEl.textContent=d;lEl.innerHTML='days until the lights go out<br>on Saturday, 7 November'}
+  else if(d===1){dEl.textContent='1';lEl.innerHTML='day to go.<br>Tomorrow night, 7 November'}
+  else if(d===0){dEl.textContent='Tonight';lEl.innerHTML='the lights go out.<br>Adrenaline Lounge, Yaba'}
+  else{dEl.textContent='Closed';lEl.innerHTML='the case is closed.<br>Case 03 is coming'}
+
+  /* flashlight in the hero follows the pointer */
+  var hero=$('#hero');
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    hero.addEventListener('pointermove',function(e){
+      var r=hero.getBoundingClientRect();
+      hero.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+      hero.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+    });
+  }
+
+  /* case files */
+  var grid=$('#boardGrid');
+  EPISODES.forEach(function(e){
+    var st=e.status,stampTxt=st==='closed'?'Case closed':st==='open'?'Case open':'Classified';
+    var el=document.createElement('article');el.className='file';
+    var h='<span class="pin"></span><span class="stamp '+st+'">'+stampTxt+'</span><h3>'+e.title+'</h3><p class="meta">'+e.meta+'</p>';
+    if(st==='secret'){
+      h+='<p class="blurb">The next victim has <span class="redact" aria-hidden="true">not been chosen</span> yet. Join the tribe and you will hear first.</p>';
+      h+='<a class="btn ghost" href="#join">Join the tribe</a>';
+    }else{
+      h+='<p class="blurb">'+e.blurb+'</p>';
+      if(st==='open'){h+='<a class="btn" href="'+e.ticketUrl+'" target="_blank" rel="noopener">Get tickets</a>'}
+      else if(e.albumUrl){h+='<a class="btn ghost" href="'+e.albumUrl+'" target="_blank" rel="noopener">Relive the night</a>'}
+      else{h+='<p class="note">Photos and video from this night are on the way. Were you there? <a href="#join">Send us yours.</a></p>'}
+    }
+    el.innerHTML=h;grid.appendChild(el);
+  });
+
+  /* red string between pins */
+  var board=$('#board'),svg=$('#string');
+  function draw(){
+    var br=board.getBoundingClientRect(),pins=$$('.pin',board);
+    svg.setAttribute('viewBox','0 0 '+br.width+' '+br.height);
+    var pts=pins.map(function(p){var r=p.getBoundingClientRect();return [r.left-br.left+r.width/2,r.top-br.top+r.height/2]});
+    var dstr='';
+    for(var i=0;i<pts.length-1;i++){
+      var a=pts[i],b=pts[i+1],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2+38;
+      dstr+='<path d="M'+a[0]+' '+a[1]+' Q'+mx+' '+my+' '+b[0]+' '+b[1]+'"/>';
+    }
+    svg.innerHTML=dstr;
+  }
+  window.addEventListener('resize',draw);window.addEventListener('load',draw);
+  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(draw)}
+  draw();setTimeout(draw,400);
+
+  /* journal */
+  var posts=$('#posts');
+  POSTS.forEach(function(p){
+    var b=document.createElement('button');b.type='button';b.className='post';b.setAttribute('data-post',p.id);
+    b.innerHTML='<time>'+p.date+'</time><h3>'+p.title+'</h3><p>'+p.summary+'</p><span class="more">Read the story</span>';
+    posts.appendChild(b);
+  });
+  var reader=$('#reader'),lastFocus=null;
+  function openPost(id){
+    var p=POSTS.filter(function(x){return x.id===id})[0];if(!p)return;
+    lastFocus=document.activeElement;
+    $('#readerDate').textContent=p.date;$('#readerTitle').textContent=p.title;
+    $('#readerBody').innerHTML=p.body.map(function(t){return '<p>'+t+'</p>'}).join('');
+    reader.hidden=false;document.body.style.overflow='hidden';$('#readerClose').focus();
+  }
+  function closePost(){reader.hidden=true;document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-post]');if(t){openPost(t.getAttribute('data-post'))}
+  });
+  $('#readerClose').addEventListener('click',closePost);
+  reader.addEventListener('click',function(e){if(e.target===reader)closePost()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!reader.hidden)closePost()});
+
+  /* copy email */
+  $('#copyMail').addEventListener('click',function(){
+    var btn=this,box=$('#mailbox');
+    function sel(){var r=document.createRange();r.selectNodeContents(box);var s=window.getSelection();s.removeAllRanges();s.addRange(r)}
+    function done(t){btn.textContent=t;setTimeout(function(){btn.textContent='Copy address'},2200)}
+    try{navigator.clipboard.writeText(LINKS.email).then(function(){done('Copied')},function(){sel();done('Press copy now')})}
+    catch(err){sel();done('Press copy now')}
+  });
+})();
+</script>
+
+</body>
+</html>
