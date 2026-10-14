@@ -25,7 +25,7 @@ var EPISODES = [
     status: "open",
     title: "Èkó After Dark",
     meta: "7 November 2026, Adrenaline Lounge, Yaba",
-    blurb: "An Ìsàlẹ̀ Èkó Special. A cooperative's annual dinner, a blackout and a body on the stage.",
+    blurb: "An Ìsàlẹ̀ Èkó Special. A cooperative's annual dinner where everybody is smiling and somebody is lying.",
     ticketUrl: "https://clooza.com/events/WHODIDIT"
   },
   {
@@ -54,12 +54,12 @@ var POSTS = [
     id: "what-to-expect",
     title: "What to expect at Èkó After Dark",
     date: "October 2026",
-    summary: "Squads, a blackout, 90 seconds with a suspect and one chance to name the killer.",
+    summary: "Squads, secrets, 90 seconds with a suspect and one chance to name the killer.",
     body: [
       "You arrive, pick up a bead colour and meet your squad. Six squads share the room, and each one starts in a different corner.",
-      "The night begins as a dinner party. Then the lights go out. When they come back, somebody is dead on the stage and every person in the room is a suspect.",
+      "The night begins as a dinner party. Enjoy it while it lasts. Before long, something goes terribly wrong, and every person in the room is a suspect.",
       "To question a suspect, your squad wins a quick challenge. A trivia question, a riddle or a mini-game gets you 90 seconds with them. You only get three attempts for the whole night, so choose carefully.",
-      "You cannot reach every suspect yourselves. Every squad also caught a different fragment of the blackout, so trade clues with other squads and work out who is telling the truth.",
+      "You cannot reach every suspect yourselves. Every squad also sees something different, so trade clues with other squads and work out who is telling the truth.",
       "At the end you hand in your verdict. The host reveals who did it.",
       "Bring friends you can trust. Or don't."
     ]
