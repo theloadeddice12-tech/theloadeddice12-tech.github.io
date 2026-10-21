@@ -76,10 +76,11 @@ a{color:var(--gold-hi)}
 .row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 @media(max-width:640px){.row2,.row3{grid-template-columns:1fr}}
-.f{display:grid;gap:6px;min-width:0}
+.f{display:grid;gap:6px;min-width:0;align-content:start}
 .f .l{font-weight:700;font-size:14px;color:var(--gold-hi)}
 .hint{font-size:14px;color:var(--muted)}
 input[type=text],input[type=url],input[type=date],input[type=email],input[type=password],textarea{width:100%;min-height:46px;padding:10px 12px;background:#0b0707;color:var(--fg);border:1px solid rgba(244,236,224,.35);font:inherit;border-radius:0}
+select{width:100%;min-height:46px;padding:10px 12px;background:#0b0707;color:var(--fg);border:1px solid rgba(244,236,224,.35);font:inherit;border-radius:0}
 textarea{resize:vertical}
 input:focus,textarea:focus{border-color:var(--tape)}
 ::placeholder{color:#8f8272}
@@ -238,8 +239,18 @@ function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s||'')}
 function validUrl(s){return /^https?:\/\/\S+\.\S+/i.test(s||'')}
 function todayLagos(){return new Date(Date.now()+3600000).toISOString().slice(0,10)}
 
+var DEFAULT_DRESS={show:true,title:'What do I wear?',
+  intro:'Trendy traditional Nigerian. Dress to impress. Everyone in the room is a suspect, so dress like someone with something to hide.',
+  tips:[{title:'Start with the fabric',text:'Aso-oke, lace, adire, ankara or brocade, cut sharp.'},
+        {title:'Think night in Lagos',text:'Black, oxblood red and gold, with one loud piece.'},
+        {title:'Finish like a suspect',text:'A gele, a statement hat, beads, brass cuffs and a good bag.'}],
+  looks:[{label:'Part one',caption:'For her',image:'lookbook.webp',alt:'A collage of guests in trendy traditional Nigerian outfits: geles, lace, agbada, aso-oke and beads, in red, black and gold',postId:'what-to-wear-part-one'}]};
 function normalize(d){
   d=d||{};
+  var dr=d.dress||DEFAULT_DRESS;
+  d.dress={show:dr.show!==false,title:dr.title||'',intro:dr.intro||'',
+    tips:(dr.tips||[]).map(function(t){return {title:t.title||'',text:t.text||''}}),
+    looks:(dr.looks||[]).map(function(l){return {label:l.label||'',caption:l.caption||'',image:l.image||'',alt:l.alt||'',postId:l.postId||''}})};
   d.links=Object.assign({whatsapp:'',instagram:'',email:''},d.links||{});
   d.events=(d.events||[]).map(function(e){
     e=Object.assign({id:'',status:'closed',title:'',tagline:'',date:'',venue:'',area:'',address:'',blurb:'',description:'',
@@ -272,7 +283,7 @@ function storyToBody(s){
   return String(s||'').split(/\n\s*\n/).map(function(x){return x.replace(/\s*\n\s*/g,' ').trim()}).filter(Boolean);
 }
 function serialize(d){
-  var out={version:2,links:{whatsapp:clean(d.links.whatsapp),instagram:clean(d.links.instagram),email:clean(d.links.email)},events:[],posts:[]};
+  var out={version:2,links:{whatsapp:clean(d.links.whatsapp),instagram:clean(d.links.instagram),email:clean(d.links.email)},events:[],dress:null,posts:[]};
   var evs=d.events.slice().sort(cmpEvents);
   out.events=evs.map(function(e){
     return {
@@ -285,6 +296,9 @@ function serialize(d){
       media:e.media.filter(function(m){return clean(m.url)}).map(function(m){return {label:clean(m.label),url:clean(m.url)}})
     };
   });
+  out.dress={show:!!d.dress.show,title:clean(d.dress.title),intro:clean(d.dress.intro),
+    tips:d.dress.tips.filter(function(t){return clean(t.title)||clean(t.text)}).map(function(t){return {title:clean(t.title),text:clean(t.text)}}),
+    looks:d.dress.looks.filter(function(l){return clean(l.image)}).map(function(l){return {label:clean(l.label),caption:clean(l.caption),image:clean(l.image),alt:clean(l.alt),postId:clean(l.postId)}})};
   var ids=postIds(d.posts);
   out.posts=d.posts.map(function(p,i){
     var body=storyToBody(p._story);
@@ -588,6 +602,67 @@ function postsPanel(){
   return box;
 }
 
+/* ------------------------------------------------------------------ dress code panel */
+function dressPanel(){
+  var dr=state.data.dress,box=h('div');
+  box.appendChild(h('p',{class:'intro',text:'The "What do I wear?" part of the homepage. Each look is one style-guide picture, for example Part one for her and Part two for him. Looks sit side by side, and each can open its own journal post.'}));
+  var show=h('input',{type:'checkbox',checked:dr.show});
+  show.addEventListener('change',function(){dr.show=show.checked;touch()});
+  box.appendChild(h('label',{class:'check',style:'margin-bottom:16px'},show,h('span',{text:'Show this section on the site (untick to hide all of it)'})));
+  box.appendChild(h('div',{class:'form'},
+    textField(dr,'title','Heading',{ph:'What do I wear?'}),
+    textField(dr,'intro','Introduction',{area:true,rows:3})));
+
+  var tipsBox=h('div',{class:'group',style:'margin-top:16px'});
+  function drawTips(){
+    tipsBox.textContent='';
+    tipsBox.appendChild(h('h3',{text:'Tips'}));
+    tipsBox.appendChild(h('p',{class:'hint',text:'Short tips beside the pictures. Up to 4.'}));
+    dr.tips.forEach(function(t,i){
+      tipsBox.appendChild(h('div',{class:'media-row'},
+        textField(t,'title','Tip '+(i+1)+' title'),textField(t,'text','Tip '+(i+1)+' text'),
+        h('button',{type:'button',class:'btn danger small','aria-label':'Remove tip '+(i+1),onclick:function(){dr.tips.splice(i,1);touch();drawTips()},text:'Remove'})));
+    });
+    if(dr.tips.length<4)tipsBox.appendChild(h('div',null,h('button',{type:'button',class:'btn ghost small',onclick:function(){dr.tips.push({title:'',text:''});touch();drawTips()},text:'Add a tip'})));
+  }
+  drawTips();box.appendChild(tipsBox);
+
+  var looksBox=h('div',{class:'group',style:'margin-top:16px'});
+  function drawLooks(){
+    looksBox.textContent='';
+    looksBox.appendChild(h('h3',{text:'Looks (style-guide pictures)'}));
+    looksBox.appendChild(h('p',{class:'hint',text:'Up to 4, shown left to right. Add Part two for him here: press "Add a look", choose his picture, label it "Part two", caption it "For him", and pick the journal post it should open.'}));
+    var ids=postIds(state.data.posts);
+    dr.looks.forEach(function(l,i){
+      var sel=h('select',null,h('option',{value:'',text:'No guide (just the picture)'}));
+      state.data.posts.forEach(function(p,k){sel.appendChild(h('option',{value:ids[k],text:p.title||'Untitled post'}))});
+      if(l.postId&&ids.indexOf(l.postId)<0)sel.appendChild(h('option',{value:l.postId,text:l.postId+' (post not found)'}));
+      sel.value=l.postId||'';
+      sel.addEventListener('change',function(){l.postId=sel.value;touch()});
+      looksBox.appendChild(h('div',{class:'group',style:'background:var(--ink-3)'},
+        h('h3',{text:'Look '+(i+1)}),
+        h('div',{class:'row2'},
+          textField(l,'label','Corner label',{ph:'Part two',hint:'The yellow tag on the picture. Leave blank for none.'}),
+          textField(l,'caption','Caption under the picture',{ph:'For him'})),
+        fieldDiv('Picture',imagePicker(l,'image',function(){return l.caption||l.label||'look'}),'A portrait picture works best.'),
+        textField(l,'alt','Describe the picture',{ph:'Men in agbada, buba and caps in black and gold…',hint:'For people using screen readers. Optional.'}),
+        field('Style guide it opens',sel,'Pick a journal post to link to. Write it in the Journal tab first.'),
+        h('div',{class:'actions'},
+          i>0?h('button',{type:'button',class:'btn ghost small',onclick:function(){dr.looks.splice(i,1);dr.looks.splice(i-1,0,l);touch();drawLooks()},text:'Move left'}):null,
+          h('button',{type:'button',class:'btn danger small sp',onclick:function(){
+            if(!confirm('Remove this look from the site?'))return;
+            if(l.image&&state.pending[l.image]&&!state.pending[l.image].done)delete state.pending[l.image];
+            dr.looks.splice(i,1);touch();drawLooks();
+          },text:'Remove this look'}))));
+    });
+    if(dr.looks.length<4)looksBox.appendChild(h('div',null,h('button',{type:'button',class:'btn',onclick:function(){
+      dr.looks.push({label:dr.looks.length?'Part '+['one','two','three','four'][dr.looks.length]:'Part one',caption:'',image:'',alt:'',postId:''});touch();drawLooks();
+    },text:'+ Add a look'})));
+  }
+  drawLooks();box.appendChild(looksBox);
+  return box;
+}
+
 /* ------------------------------------------------------------------ settings panel */
 function settingsPanel(){
   var box=h('div');
@@ -639,6 +714,7 @@ function usedPaths(out){
   var u={};
   out.events.forEach(function(e){if(e.poster)u[e.poster]=1;(e.images||[]).forEach(function(m){if(m.src)u[m.src]=1})});
   out.posts.forEach(function(p){if(p.image)u[p.image]=1});
+  out.dress.looks.forEach(function(l){if(l.image)u[l.image]=1});
   return u;
 }
 function commitMsg(what){return 'Admin: '+what+(state.name?' (by '+state.name+')':'')}
@@ -709,7 +785,7 @@ function signOut(){
 function renderPanel(){
   var y=window.scrollY,slot=$('#panel');if(!slot)return;
   slot.textContent='';
-  slot.appendChild(state.tab==='events'?eventsPanel():state.tab==='posts'?postsPanel():settingsPanel());
+  slot.appendChild(state.tab==='events'?eventsPanel():state.tab==='posts'?postsPanel():state.tab==='dress'?dressPanel():settingsPanel());
   document.querySelectorAll('.tab').forEach(function(t){t.setAttribute('aria-selected',t.dataset.tab===state.tab?'true':'false')});
   updateBar();window.scrollTo(0,y);
 }
@@ -723,7 +799,7 @@ function renderApp(){
     h('a',{class:'btn ghost small',href:site,target:'_blank',rel:'noopener',text:'View site'}),
     h('button',{type:'button',class:'btn',id:'saveBtn',onclick:function(){save(false)},text:'Save changes'}))));
   var tabs=h('div',{class:'tabs',role:'tablist'});
-  [['events','Events'],['posts','Journal'],['settings','Settings']].forEach(function(t){
+  [['events','Events'],['posts','Journal'],['dress','Dress code'],['settings','Settings']].forEach(function(t){
     tabs.appendChild(h('button',{type:'button',class:'tab',role:'tab','data-tab':t[0],onclick:function(){state.tab=t[0];state.openKey=null;state.banner=null;var bs=$('#bannerSlot');if(bs)bs.textContent='';renderPanel()},text:t[1]}));
   });
   app.appendChild(h('div',{class:'wrap'},tabs,h('div',{id:'bannerSlot'}),h('div',{id:'panel'}),
