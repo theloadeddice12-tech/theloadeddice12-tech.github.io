@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>The Loaded Dice Admin</title>
+<style>
+:root{
+  --ink:#0b0707;--ink-2:#140b0c;--ink-3:#1f1213;--ink-4:#2a1819;
+  --fg:#f4ece0;--muted:#c0b2a0;--gold:#d6ab52;--gold-hi:#f2d58c;
+  --blood:#a31c27;--blood-hi:#e03545;--tape:#ffc61a;--ok:#4fbf7a;
+  --line:rgba(214,171,82,.32);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ink);color:var(--fg);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:700;margin:0;line-height:1.15}
+p{margin:0}
+a{color:var(--gold-hi)}
+:focus-visible{outline:3px solid var(--tape);outline-offset:2px}
+.wrap{max-width:880px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left)) 0 max(16px,env(safe-area-inset-right))}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border:2px solid var(--blood);background:var(--blood);color:#fff;font:700 15px/1.2 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;cursor:pointer;text-decoration:none;border-radius:0}
+.btn:hover{background:var(--blood-hi);border-color:var(--blood-hi)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;border-color:var(--gold);color:var(--gold-hi)}
+.btn.ghost:hover{background:var(--gold);color:var(--ink)}
+.btn.danger{background:transparent;border-color:var(--blood-hi);color:#ff8a94}
+.btn.danger:hover{background:var(--blood-hi);color:#fff}
+.btn.small{min-height:38px;padding:6px 12px;font-size:14px}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:rgba(11,7,7,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:10px;min-height:64px;flex-wrap:wrap;padding-block:8px}
+.brand{font:700 20px/1 Georgia,serif;color:var(--gold-hi);margin-right:auto}
+.brand small{display:block;font:600 12px/1.2 system-ui,sans-serif;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+.state{font-size:14px;color:var(--muted)}
+.state.dirty{color:var(--tape);font-weight:700}
+
+/* tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:22px 0 24px;overflow-x:auto}
+.tab{flex:1 0 auto;min-height:46px;padding:10px 18px;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font:700 16px/1.2 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--gold-hi);border-bottom-color:var(--tape)}
+
+/* banner and toast */
+.banner{margin:18px 0 0;padding:14px 16px;border:1px solid var(--blood-hi);background:#2a0e12}
+.banner.ok{border-color:var(--ok);background:#0f2418}
+.banner ul{margin:6px 0 0;padding-left:20px}
+.banner .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;max-width:min(92vw,520px);padding:12px 18px;background:var(--ok);color:#06180d;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+
+/* cards and items */
+.intro{color:var(--muted);max-width:44em;margin-bottom:18px}
+.item{background:var(--ink-3);border:1px solid var(--line);margin-bottom:12px}
+.item-head{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:12px 16px;background:none;border:0;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.item-head:hover{background:var(--ink-4)}
+.item-title{font:700 18px/1.25 Georgia,serif;flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.chip{padding:2px 9px;font:700 12px/1.6 system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.open{border-color:var(--ok);color:var(--ok)}
+.chip.closed{border-color:var(--blood-hi);color:#ff8a94}
+.chip.secret{border-color:var(--muted);color:var(--muted)}
+.chip.home{border-color:var(--tape);color:var(--tape)}
+.chip.warn{background:var(--tape);color:#120d08;border-color:var(--tape)}
+.chev{flex:0 0 auto;color:var(--gold);transition:transform .15s}
+.item-head[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.item-body{padding:6px 16px 20px;border-top:1px solid var(--line)}
+@media(max-width:560px){.item-head{flex-wrap:wrap}.chips{justify-content:flex-start;order:3;width:100%}}
+
+/* forms */
+.form{display:grid;gap:16px;margin-top:14px}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media(max-width:640px){.row2,.row3{grid-template-columns:1fr}}
+.f{display:grid;gap:6px;min-width:0}
+.f .l{font-weight:700;font-size:14px;color:var(--gold-hi)}
+.hint{font-size:14px;color:var(--muted)}
+input[type=text],input[type=url],input[type=date],input[type=email],input[type=password],textarea{width:100%;min-height:46px;padding:10px 12px;background:#0b0707;color:var(--fg);border:1px solid rgba(244,236,224,.35);font:inherit;border-radius:0}
+textarea{resize:vertical}
+input:focus,textarea:focus{border-color:var(--tape)}
+::placeholder{color:#8f8272}
+.group{display:grid;gap:14px;padding:16px;border:1px dashed var(--line);background:var(--ink-2)}
+.group h3{font:700 17px/1.2 Georgia,serif;color:var(--gold-hi)}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.segbtn{min-height:58px;padding:8px 10px;background:var(--ink-2);border:2px solid var(--line);color:var(--fg);font:inherit;cursor:pointer;display:grid;gap:0;text-align:center}
+.segbtn small{color:var(--muted);font-size:13px}
+.segbtn.on{border-color:var(--tape);background:var(--ink-4)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;padding-top:16px;border-top:1px solid var(--line)}
+.actions .sp{margin-left:auto}
+.media-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) auto;gap:10px;align-items:end}
+@media(max-width:640px){.media-row{grid-template-columns:1fr}}
+.pick{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.thumb{width:84px;height:105px;object-fit:cover;border:1px solid var(--line);background:#000}
+.pick .stack{display:grid;gap:8px}
+
+/* login */
+.login{max-width:560px;margin:8vh auto 40px}
+.login h1{font-size:34px;color:var(--gold-hi)}
+.card{background:var(--ink-3);border:1px solid var(--line);padding:22px;margin-top:20px}
+details{margin-top:14px;color:var(--muted)}
+summary{cursor:pointer;color:var(--gold-hi);font-weight:700;min-height:32px}
+details ol{padding-left:20px;margin:10px 0 0}
+details li{margin-bottom:6px}
+.check{display:flex;gap:10px;align-items:flex-start;color:var(--muted)}
+.check input{width:22px;height:22px;margin-top:2px;accent-color:var(--blood)}
+.foot{margin:40px 0 60px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<noscript><p style="padding:24px">This page needs JavaScript to work.</p></noscript>
+
+<script>
+(function(){
+'use strict';
+
+/* ------------------------------------------------------------------ settings */
+var DEFAULT_REPO='theloadeddice12-tech/theloadeddice12-tech.github.io';
+var STORE_KEY='ld-admin-v1';
+var MAX_IMG=1400;
+
+/* ------------------------------------------------------------------ tiny DOM helper */
+function h(tag,attrs){
+  var el=document.createElement(tag);
+  if(attrs){for(var k in attrs){
+    var v=attrs[k];if(v==null||v===false)continue;
+    if(k==='class')el.className=v;
+    else if(k==='text')el.textContent=v;
+    else if(k==='value')el.value=v;
+    else if(k==='checked')el.checked=!!v;
+    else if(k.slice(0,2)==='on')el.addEventListener(k.slice(2),v);
+    else el.setAttribute(k,v===true?'':v);
+  }}
+  for(var i=2;i<arguments.length;i++)add(el,arguments[i]);
+  return el;
+}
+function add(el,c){
+  if(c==null||c===false)return;
+  if(Array.isArray(c))c.forEach(function(x){add(el,x)});
+  else if(c.nodeType)el.appendChild(c);
+  else el.appendChild(document.createTextNode(String(c)));
+}
+function $(s,r){return (r||document).querySelector(s)}
+function uid(){return 'k'+Math.random().toString(36).slice(2,10)}
+
+/* ------------------------------------------------------------------ state */
+var state={
+  token:'',repo:DEFAULT_REPO,branch:'',name:'',remember:true,
+  sha:'',data:null,orig:'',tab:'events',openKey:null,
+  pending:{},saving:false,banner:null
+};
+
+/* ------------------------------------------------------------------ storage (may be blocked, so always guarded) */
+function loadSaved(){
+  var raw=null;
+  try{raw=localStorage.getItem(STORE_KEY)}catch(e){}
+  if(!raw){try{raw=sessionStorage.getItem(STORE_KEY)}catch(e){}}
+  if(!raw)return null;
+  try{return JSON.parse(raw)}catch(e){return null}
+}
+function saveCreds(){
+  var v=JSON.stringify({token:state.token,repo:state.repo,branch:state.branch,name:state.name,remember:state.remember});
+  try{localStorage.removeItem(STORE_KEY)}catch(e){}
+  try{sessionStorage.removeItem(STORE_KEY)}catch(e){}
+  try{(state.remember?localStorage:sessionStorage).setItem(STORE_KEY,v)}catch(e){}
+}
+function clearCreds(){
+  try{localStorage.removeItem(STORE_KEY)}catch(e){}
+  try{sessionStorage.removeItem(STORE_KEY)}catch(e){}
+}
+
+/* ------------------------------------------------------------------ GitHub API */
+function cpath(p){return p.split('/').map(encodeURIComponent).join('/')}
+function gh(method,path,body){
+  var opts={method:method,cache:'no-store',headers:{
+    'Accept':'application/vnd.github+json','Authorization':'Bearer '+state.token,'X-GitHub-Api-Version':'2022-11-28'}};
+  if(body){opts.body=JSON.stringify(body);opts.headers['Content-Type']='application/json'}
+  return fetch('https://api.github.com'+path,opts).then(function(res){
+    return res.json().catch(function(){return null}).then(function(data){
+      if(!res.ok){var err=new Error((data&&data.message)||('HTTP '+res.status));err.status=res.status;throw err}
+      return data;
+    });
+  });
+}
+function friendly(e){
+  if(e&&e.friendly)return e.friendly;
+  if(!e||e.status==null)return "Can't reach GitHub. Check your internet connection and try again.";
+  var m=String(e.message||'');
+  if(e.status===401)return "GitHub didn't accept that token. It may have expired or been copied wrongly.";
+  if(e.status===403){
+    if(/rate limit/i.test(m))return 'GitHub is asking us to slow down. Wait a few minutes and try again.';
+    return "This token isn't allowed to change the site. Make a new one with Contents set to Read and write.";
+  }
+  if(e.status===404)return "GitHub can't find that repository or file with this token. Check the repository name, and that the token was given access to it.";
+  return m||('Something went wrong (HTTP '+e.status+').');
+}
+function utf8ToB64(str){
+  var bytes=new TextEncoder().encode(str),bin='',CH=0x8000;
+  for(var i=0;i<bytes.length;i+=CH)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+CH));
+  return btoa(bin);
+}
+function b64ToUtf8(b64){
+  var bin=atob(String(b64).replace(/\s/g,'')),bytes=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function blobToB64(blob){
+  return new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){res(String(r.result).split(',')[1])};
+    r.onerror=function(){rej(new Error('Could not read the image.'))};
+    r.readAsDataURL(blob);
+  });
+}
+
+/* ------------------------------------------------------------------ content file */
+function parseContentJs(text){
+  var i=text.indexOf('window.SITE');
+  var s=i<0?-1:text.indexOf('{',i),e=text.lastIndexOf('}');
+  if(s<0||e<s){var err=new Error('format');err.friendly="content.js isn't in the new format yet. Upload the new content.js from the latest site files first.";throw err}
+  try{return JSON.parse(text.slice(s,e+1))}
+  catch(x){var err2=new Error('json');err2.friendly="content.js has a typo in it (probably a missing quote or comma), so I can't read it. Fix it on GitHub, or upload the original again.";throw err2}
+}
+var HEAD='/* THE LOADED DICE: site content.\n   Written by the admin page (admin.html). You can also edit it by hand, but keep everything\n   after "window.SITE =" valid JSON: double quotes everywhere and no trailing commas. */\n';
+function toContentJs(out){return HEAD+'window.SITE = '+JSON.stringify(out,null,2)+';\n'}
+
+function clean(s){return String(s==null?'':s).trim()}
+function slug(s){
+  return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,50);
+}
+function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s||'')}
+function validUrl(s){return /^https?:\/\/\S+\.\S+/i.test(s||'')}
+function todayLagos(){return new Date(Date.now()+3600000).toISOString().slice(0,10)}
+
+function normalize(d){
+  d=d||{};
+  d.links=Object.assign({whatsapp:'',instagram:'',email:''},d.links||{});
+  d.events=(d.events||[]).map(function(e){
+    e=Object.assign({id:'',status:'closed',title:'',tagline:'',date:'',venue:'',area:'',address:'',blurb:'',description:'',
+      ticketUrl:'',price:'',priceLabel:'',priceNote:'',wear:'',poster:'',posterAlt:'',meta:'',media:[],images:[]},e);
+    if(['open','closed','secret'].indexOf(e.status)<0)e.status='closed';
+    e.media=(e.media||[]).map(function(m){return {label:m.label||'',url:m.url||''}});
+    e.images=(e.images||[]).map(function(m){return {src:m.src||'',alt:m.alt||''}});
+    e._k=uid();return e;
+  });
+  d.posts=(d.posts||[]).map(function(p){
+    p=Object.assign({id:'',title:'',date:'',summary:'',image:'',body:[]},p);
+    p._story=(p.body||[]).join('\n\n');p._k=uid();return p;
+  });
+  return d;
+}
+function cmpEvents(a,b){
+  var da=validDate(a.date)?a.date:'9999',db=validDate(b.date)?b.date:'9999';
+  return da<db?-1:da>db?1:0;
+}
+function postIds(posts){
+  var taken={};posts.forEach(function(p){if(p.id)taken[p.id]=1});
+  return posts.map(function(p){
+    if(p.id)return p.id;
+    var base=slug(p.title)||'post',id=base,n=2;
+    while(taken[id]){id=base+'-'+n;n++}
+    taken[id]=1;return id;
+  });
+}
+function storyToBody(s){
+  return String(s||'').split(/\n\s*\n/).map(function(x){return x.replace(/\s*\n\s*/g,' ').trim()}).filter(Boolean);
+}
+function serialize(d){
+  var out={version:2,links:{whatsapp:clean(d.links.whatsapp),instagram:clean(d.links.instagram),email:clean(d.links.email)},events:[],posts:[]};
+  var evs=d.events.slice().sort(cmpEvents);
+  out.events=evs.map(function(e){
+    return {
+      id:e.id,status:e.status,title:clean(e.title),tagline:clean(e.tagline),date:clean(e.date),
+      venue:clean(e.venue),area:clean(e.area),address:clean(e.address),blurb:clean(e.blurb),
+      description:clean(e.description),ticketUrl:clean(e.ticketUrl),price:clean(e.price),
+      priceLabel:clean(e.priceLabel),priceNote:clean(e.priceNote),wear:clean(e.wear),
+      poster:clean(e.poster),posterAlt:clean(e.posterAlt),meta:clean(e.meta),
+      images:e.images.filter(function(m){return clean(m.src)}).map(function(m){return {src:clean(m.src),alt:clean(m.alt)}}),
+      media:e.media.filter(function(m){return clean(m.url)}).map(function(m){return {label:clean(m.label),url:clean(m.url)}})
+    };
+  });
+  var ids=postIds(d.posts);
+  out.posts=d.posts.map(function(p,i){
+    var body=storyToBody(p._story);
+    return {id:ids[i],title:clean(p.title),date:clean(p.date),
+      summary:clean(p.summary)||(body[0]?(body[0].length>140?body[0].slice(0,140).replace(/\s+\S*$/,'')+'…':body[0]):''),
+      image:clean(p.image),body:body};
+  });
+  return out;
+}
+/* give new things their permanent ids and put events in date order (in memory, after a save) */
+function finalize(d){
+  var ids=postIds(d.posts);d.posts.forEach(function(p,i){p.id=ids[i]});
+  d.events.forEach(function(e){if(!e.id)e.id=(slug(e.title)||'event')+'-'+Math.random().toString(36).slice(2,6)});
+  d.events.sort(cmpEvents);
+}
+
+/* ------------------------------------------------------------------ dirty tracking */
+function pendingCount(){
+  var n=0;for(var k in state.pending)if(!state.pending[k].done)n++;return n;
+}
+function isDirty(){
+  if(!state.data)return false;
+  return JSON.stringify(serialize(state.data))!==state.orig||pendingCount()>0;
+}
+function touch(){updateBar()}
+function updateBar(){
+  var st=$('#state'),sv=$('#saveBtn');if(!st||!sv)return;
+  var d=isDirty();
+  st.textContent=state.saving?'Saving…':d?'Unsaved changes':'All changes saved';
+  st.className='state'+(d&&!state.saving?' dirty':'');
+  sv.disabled=state.saving||!d;
+  sv.textContent=state.saving?'Saving…':'Save changes';
+}
+window.addEventListener('beforeunload',function(e){if(isDirty()){e.preventDefault();e.returnValue=''}});
+
+/* ------------------------------------------------------------------ messages */
+var toastTimer=null;
+function toast(msg){
+  var t=$('#toast');t.textContent=msg;t.hidden=false;
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.hidden=true},5200);
+}
+function setBanner(b){state.banner=b;var slot=$('#bannerSlot');if(slot)drawBanner(slot)}
+function drawBanner(slot){
+  slot.textContent='';
+  var b=state.banner;if(!b)return;
+  var el=h('div',{class:'banner'+(b.kind==='ok'?' ok':''),role:'alert'},h('b',{text:b.title}));
+  if(b.items&&b.items.length)el.appendChild(h('ul',null,b.items.map(function(i){return h('li',{text:i})})));
+  if(b.text)el.appendChild(h('p',{text:b.text}));
+  if(b.actions)el.appendChild(h('div',{class:'acts'},b.actions.map(function(a){return h('button',{type:'button',class:'btn small '+(a.cls||''),onclick:a.fn,text:a.label})})));
+  slot.appendChild(el);
+  el.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+/* ------------------------------------------------------------------ images */
+function processImage(file){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file),img=new Image();
+    img.onload=function(){
+      var w=img.naturalWidth,hh=img.naturalHeight,s=Math.min(1,MAX_IMG/Math.max(w,hh));
+      var c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(hh*s);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+      c.toBlob(function(b){
+        if(b&&b.type==='image/webp')return res({blob:b,ext:'webp'});
+        c.toBlob(function(j){j?res({blob:j,ext:'jpg'}):rej(new Error("Couldn't prepare that image."))},'image/jpeg',0.86);
+      },'image/webp',0.84);
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);rej(new Error("That file isn't a picture this browser can read. Try a JPG or PNG."))};
+    img.src=url;
+  });
+}
+function previewSrc(path){return state.pending[path]?state.pending[path].url:path}
+function imagePicker(obj,key,seed,onChange){
+  var wrap=h('div',{class:'pick'});
+  function draw(){
+    wrap.textContent='';
+    var path=obj[key];
+    if(path)wrap.appendChild(h('img',{class:'thumb',src:previewSrc(path),alt:'Selected picture'}));
+    var input=h('input',{type:'file',accept:'image/*',class:'sr','aria-label':'Choose a picture'});
+    input.addEventListener('change',function(){
+      var f=input.files&&input.files[0];if(!f)return;
+      processImage(f).then(function(r){
+        if(path&&state.pending[path]&&!state.pending[path].done)delete state.pending[path];
+        var np='uploads/'+(slug(seed())||'image')+'-'+Date.now().toString(36)+'.'+r.ext;
+        state.pending[np]={blob:r.blob,ext:r.ext,url:URL.createObjectURL(r.blob),done:false};
+        obj[key]=np;touch();if(onChange)onChange();draw();
+      }).catch(function(e){toast(e.message)});
+    });
+    var stack=h('div',{class:'stack'},
+      h('button',{type:'button',class:'btn ghost small',onclick:function(){input.click()},text:path?'Change picture':'Choose a picture'}),
+      path?h('button',{type:'button',class:'btn danger small',onclick:function(){
+        if(state.pending[path]&&!state.pending[path].done)delete state.pending[path];
+        obj[key]='';touch();if(onChange)onChange();draw();
+      },text:'Remove'}):null,
+      input);
+    wrap.appendChild(stack);
+  }
+  draw();return wrap;
+}
+
+/* ------------------------------------------------------------------ form fields */
+function field(label,control,hint){
+  return h('label',{class:'f'},h('span',{class:'l',text:label}),control,hint?h('span',{class:'hint',text:hint}):null);
+}
+function fieldDiv(label,control,hint){
+  return h('div',{class:'f',role:'group','aria-label':label},h('span',{class:'l',text:label}),control,hint?h('span',{class:'hint',text:hint}):null);
+}
+function textField(obj,key,label,o){
+  o=o||{};
+  var el=o.area
+    ?h('textarea',{rows:o.rows||3,placeholder:o.ph||'',value:obj[key]||''})
+    :h('input',{type:o.type||'text',placeholder:o.ph||'',autocomplete:'off',inputmode:o.mode,value:obj[key]||''});
+  el.addEventListener('input',function(){obj[key]=el.value;touch();if(o.onInput)o.onInput(el.value)});
+  if(o.onBlur)el.addEventListener('change',function(){o.onBlur(el)});
+  return field(label,el,o.hint);
+}
+function autoLabel(u){
+  var host='';try{host=new URL(u).hostname.replace(/^www\./,'')}catch(e){return ''}
+  if(/youtube|youtu\.be|vimeo|tiktok/.test(host))return 'Watch the video';
+  if(/google|goo\.gl|dropbox|icloud|flickr|wetransfer|onedrive|1drv|pcloud|mega\./.test(host))return 'Get your photos';
+  return 'Open the link';
+}
+function mediaEditor(ev){
+  var wrap=h('div',{class:'group'});
+  function draw(){
+    wrap.textContent='';
+    wrap.appendChild(h('h3',{text:'Photos and videos'}));
+    wrap.appendChild(h('p',{class:'hint',text:'Paste a Google Photos, Google Drive, YouTube or any other link. Guests tap the button on this night\'s case file and go straight there. In Google Photos: open the album, tap Share, create a link, copy it. Make sure link sharing is on, or guests will see "request access".'}));
+    ev.media.forEach(function(m,i){
+      var url=h('input',{type:'url',inputmode:'url',placeholder:'https://photos.app.goo.gl/…',value:m.url,autocomplete:'off'});
+      var lab=h('input',{type:'text',placeholder:'Button text',value:m.label,autocomplete:'off'});
+      url.addEventListener('input',function(){m.url=url.value;touch()});
+      url.addEventListener('change',function(){
+        var v=url.value.trim();
+        if(v&&!/^https?:\/\//i.test(v)&&/^[\w-]+(\.[\w-]+)+/.test(v))v='https://'+v;
+        url.value=v;m.url=v;
+        if(v&&!lab.value.trim()){m.label=autoLabel(v);lab.value=m.label}
+        touch();
+      });
+      lab.addEventListener('input',function(){m.label=lab.value;touch()});
+      wrap.appendChild(h('div',{class:'media-row'},
+        field('Link',url),field('Button text',lab),
+        h('button',{type:'button',class:'btn danger small',onclick:function(){ev.media.splice(i,1);touch();draw()},'aria-label':'Remove this link',text:'Remove'})));
+    });
+    wrap.appendChild(h('div',null,h('button',{type:'button',class:'btn ghost small',onclick:function(){ev.media.push({label:'',url:''});touch();draw()},text:ev.media.length?'Add another link':'Add a photo or video link'})));
+  }
+  draw();return wrap;
+}
+
+var MAX_PICS=4;
+function galleryEditor(ev){
+  var wrap=h('div',{class:'group'});
+  function drop(im){if(im.src&&state.pending[im.src]&&!state.pending[im.src].done)delete state.pending[im.src]}
+  function draw(){
+    wrap.textContent='';
+    wrap.appendChild(h('h3',{text:'Pictures'}));
+    wrap.appendChild(h('p',{class:'hint',text:'Up to '+MAX_PICS+' pictures for this night: teasers before it, moments from it after. They show on its case file and guests can tap them to see them bigger. They are shrunk automatically so the site stays fast.'}));
+    ev.images.forEach(function(im,i){
+      var alt=h('input',{type:'text',placeholder:'What is in the picture? (optional)',value:im.alt,autocomplete:'off'});
+      alt.addEventListener('input',function(){im.alt=alt.value;touch()});
+      wrap.appendChild(h('div',{class:'media-row'},
+        fieldDiv('Picture '+(i+1),imagePicker(im,'src',function(){return ev.title||'picture'})),
+        field('Description',alt),
+        h('button',{type:'button',class:'btn danger small','aria-label':'Remove picture '+(i+1),onclick:function(){drop(im);ev.images.splice(i,1);touch();draw()},text:'Remove'})));
+    });
+    if(ev.images.length<MAX_PICS)wrap.appendChild(h('div',null,h('button',{type:'button',class:'btn ghost small',onclick:function(){ev.images.push({src:'',alt:''});touch();draw()},text:ev.images.length?'Add another picture':'Add a picture'})));
+  }
+  draw();return wrap;
+}
+
+/* ------------------------------------------------------------------ events panel */
+function featuredEvent(){
+  var open=state.data.events.filter(function(e){return e.status==='open'}).sort(cmpEvents);
+  return open[0]||null;
+}
+function nice(iso){
+  if(!validDate(iso))return '';
+  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],p=iso.split('-');
+  return (+p[2])+' '+M[+p[1]-1]+' '+p[0];
+}
+function eventItem(ev,feat){
+  var isOpen=state.openKey===ev._k;
+  var titleEl=h('span',{class:'item-title',text:ev.title||'Untitled event'});
+  var chips=h('span',{class:'chips'},
+    h('span',{class:'chip '+ev.status,text:ev.status==='open'?'Open':ev.status==='closed'?'Closed':'Secret'}),
+    validDate(ev.date)?h('span',{class:'chip',text:nice(ev.date)}):null,
+    ev===feat?h('span',{class:'chip home',text:'On the homepage'}):null,
+    ev.status==='open'&&validDate(ev.date)&&ev.date<todayLagos()?h('span',{class:'chip warn',text:'Date has passed'}):null);
+  var head=h('button',{type:'button',class:'item-head','aria-expanded':isOpen?'true':'false',onclick:function(){
+    state.openKey=isOpen?null:ev._k;renderPanel();
+  }},titleEl,chips,h('span',{class:'chev','aria-hidden':'true',text:'▾'}));
+  var item=h('article',{class:'item'},head);
+  if(isOpen)item.appendChild(h('div',{class:'item-body'},eventForm(ev,titleEl)));
+  return item;
+}
+function eventForm(ev,titleEl){
+  var seg=h('div',{class:'seg',role:'radiogroup','aria-label':'Status'});
+  [['open','Open','Tickets on sale'],['closed','Closed','It has happened'],['secret','Secret','Teaser only']].forEach(function(s){
+    seg.appendChild(h('button',{type:'button',role:'radio','aria-checked':ev.status===s[0]?'true':'false',class:'segbtn'+(ev.status===s[0]?' on':''),onclick:function(){
+      if(ev.status===s[0])return;ev.status=s[0];touch();renderPanel();
+    }},h('b',{text:s[1]}),h('small',{text:s[2]})));
+  });
+  var form=h('div',{class:'form'});
+  form.appendChild(fieldDiv('Status',seg,'Open puts it on the homepage with a tickets button. Closed moves it to the case files, where you can add photo and video links. Secret shows a "classified" teaser.'));
+  form.appendChild(textField(ev,'title','Title',{ph:'Èkó After Dark',onInput:function(v){titleEl.textContent=v||'Untitled event'}}));
+
+  if(ev.status==='secret'){
+    form.appendChild(textField(ev,'meta','Teaser line',{ph:'Venue and date are classified',hint:'Shown under the title on the case file.'}));
+  }else{
+    form.appendChild(h('div',{class:'row2'},
+      textField(ev,'date','Date',{type:'date'}),
+      textField(ev,'venue','Venue',{ph:'Adrenaline Lounge'})));
+    form.appendChild(h('div',{class:'row2'},
+      textField(ev,'area','Area',{ph:'Yaba',hint:'Short, shown on the case file.'}),
+      textField(ev,'address','Full address',{ph:'49 Lawani Street, Akoka, Yaba, Lagos',hint:'Used for the "Open in Maps" link.'})));
+    form.appendChild(textField(ev,'blurb','Short description',{area:true,rows:3,hint:'Two or three lines for the case file card.'}));
+
+    if(ev.status==='open'){
+      form.appendChild(h('div',{class:'group'},
+        h('h3',{text:'The homepage case section'}),
+        h('p',{class:'hint',text:'Shown big on the homepage while this event is open. If two events are open, the one happening soonest is shown.'}),
+        textField(ev,'tagline','Tagline',{ph:'An Ìsàlẹ̀ Èkó Special'}),
+        textField(ev,'description','Full description',{area:true,rows:4}),
+        textField(ev,'ticketUrl','Tickets link',{type:'url',mode:'url',ph:'https://clooza.com/events/…',hint:'Every "Get tickets" button on the site uses this.'}),
+        h('div',{class:'row3'},
+          textField(ev,'price','Price',{ph:'₦7,500'}),
+          textField(ev,'priceLabel','Price label',{ph:'early bird'}),
+          textField(ev,'priceNote','Price note',{ph:'Goes up to ₦10,000 for standard tickets.'})),
+        textField(ev,'wear','What to wear',{ph:'Trendy traditional Nigerian. Dress to impress.'}),
+        fieldDiv('Poster',imagePicker(ev,'poster',function(){return ev.title||'poster'}),'Optional. A portrait picture works best. It is shrunk automatically so the page stays fast.'),
+        textField(ev,'posterAlt','Describe the poster',{ph:'A woman in a red gele looking over Lagos lagoon at dusk…',hint:'For people using screen readers. Optional.'})));
+    }
+    if(ev.status==='closed')form.appendChild(mediaEditor(ev));
+  }
+
+  form.appendChild(galleryEditor(ev));
+  var acts=h('div',{class:'actions'});
+  if(ev.status==='open')acts.appendChild(h('button',{type:'button',class:'btn ghost',onclick:function(){ev.status='closed';touch();renderPanel()},text:'Close this event'}));
+  if(ev.status==='closed')acts.appendChild(h('button',{type:'button',class:'btn ghost',onclick:function(){ev.status='open';touch();renderPanel()},text:'Re-open this event'}));
+  acts.appendChild(h('button',{type:'button',class:'btn danger sp',onclick:function(){
+    if(!confirm('Delete "'+(ev.title||'this event')+'" from the site? You can still get it back from the edit history on GitHub.'))return;
+    state.data.events=state.data.events.filter(function(x){return x!==ev});state.openKey=null;touch();renderPanel();
+  },text:'Delete event'}));
+  form.appendChild(acts);
+  return form;
+}
+function eventsPanel(){
+  var box=h('div');
+  box.appendChild(h('p',{class:'intro',text:'Open and close cases, add new ones, and add photo and video links after a night. Events sort themselves by date. Changes go live a minute or two after you press Save.'}));
+  box.appendChild(h('div',{style:'margin-bottom:16px'},h('button',{type:'button',class:'btn',onclick:function(){
+    var ev=normalize({events:[{status:'open',title:'',date:''}]}).events[0];
+    state.data.events.push(ev);state.openKey=ev._k;touch();renderPanel();
+    setTimeout(function(){var a=document.activeElement;if(a&&a.closest&&a.closest('.item-body'))return;var i=$('.item-body input');if(i)i.focus()},50);
+  },text:'+ Add an event'})));
+  var feat=featuredEvent();
+  state.data.events.slice().sort(cmpEvents).reverse().forEach(function(ev){box.appendChild(eventItem(ev,feat))});
+  if(!state.data.events.length)box.appendChild(h('p',{class:'hint',text:'No events yet.'}));
+  return box;
+}
+
+/* ------------------------------------------------------------------ journal panel */
+function postItem(p,i,total){
+  var isOpen=state.openKey===p._k;
+  var titleEl=h('span',{class:'item-title',text:p.title||'Untitled post'});
+  var head=h('button',{type:'button',class:'item-head','aria-expanded':isOpen?'true':'false',onclick:function(){
+    state.openKey=isOpen?null:p._k;renderPanel();
+  }},titleEl,h('span',{class:'chips'},p.date?h('span',{class:'chip',text:p.date}):null),h('span',{class:'chev','aria-hidden':'true',text:'▾'}));
+  var item=h('article',{class:'item'},head);
+  if(!isOpen)return item;
+  var form=h('div',{class:'form'});
+  form.appendChild(textField(p,'title','Title',{onInput:function(v){titleEl.textContent=v||'Untitled post'}}));
+  form.appendChild(textField(p,'date','Date shown',{ph:'October 2026',hint:'Whatever you want readers to see, for example "21 October 2026".'}));
+  form.appendChild(textField(p,'summary','Short summary',{area:true,rows:2,hint:'Shown on the card. Leave it blank to use the start of the story.'}));
+  form.appendChild(textField(p,'_story','The story',{area:true,rows:12,hint:'Leave a blank line between paragraphs.'}));
+  form.appendChild(fieldDiv('Cover picture',imagePicker(p,'image',function(){return p.title||'post'}),'Optional. Shown at the top of the story.'));
+  var acts=h('div',{class:'actions'},
+    h('button',{type:'button',class:'btn ghost small',disabled:i===0?'':null,onclick:function(){move(p,-1)},text:'Move up'}),
+    h('button',{type:'button',class:'btn ghost small',disabled:i===total-1?'':null,onclick:function(){move(p,1)},text:'Move down'}),
+    h('button',{type:'button',class:'btn danger sp',onclick:function(){
+      if(!confirm('Delete "'+(p.title||'this post')+'" from the journal? You can still get it back from the edit history on GitHub.'))return;
+      state.data.posts=state.data.posts.filter(function(x){return x!==p});state.openKey=null;touch();renderPanel();
+    },text:'Delete post'}));
+  form.appendChild(acts);
+  item.appendChild(h('div',{class:'item-body'},form));
+  return item;
+}
+function move(p,dir){
+  var a=state.data.posts,i=a.indexOf(p),j=i+dir;if(j<0||j>=a.length)return;
+  a.splice(i,1);a.splice(j,0,p);touch();renderPanel();
+}
+function postsPanel(){
+  var box=h('div');
+  box.appendChild(h('p',{class:'intro',text:'Write journal posts for the site. The first one in the list appears first on the homepage.'}));
+  box.appendChild(h('div',{style:'margin-bottom:16px'},h('button',{type:'button',class:'btn',onclick:function(){
+    var d=new Date(Date.now()+3600000),M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var p=normalize({posts:[{title:'',date:d.getUTCDate()+' '+M[d.getUTCMonth()]+' '+d.getUTCFullYear()}]}).posts[0];
+    state.data.posts.unshift(p);state.openKey=p._k;touch();renderPanel();
+    setTimeout(function(){var a=document.activeElement;if(a&&a.closest&&a.closest('.item-body'))return;var i=$('.item-body input');if(i)i.focus()},50);
+  },text:'+ Write a post'})));
+  state.data.posts.forEach(function(p,i){box.appendChild(postItem(p,i,state.data.posts.length))});
+  if(!state.data.posts.length)box.appendChild(h('p',{class:'hint',text:'No posts yet.'}));
+  return box;
+}
+
+/* ------------------------------------------------------------------ settings panel */
+function settingsPanel(){
+  var box=h('div');
+  box.appendChild(h('p',{class:'intro',text:'Links used across the site.'}));
+  box.appendChild(h('div',{class:'form'},
+    textField(state.data.links,'whatsapp','WhatsApp community link',{type:'url',mode:'url',ph:'https://chat.whatsapp.com/…'}),
+    textField(state.data.links,'instagram','Instagram link',{type:'url',mode:'url',ph:'https://www.instagram.com/the_loadeddice'}),
+    textField(state.data.links,'email','Contact email',{type:'email',mode:'email',ph:'hello@theloadeddice.com',hint:'Shown on the Join us section and used by the email buttons.'})));
+  box.appendChild(h('div',{class:'card'},
+    h('h3',{text:'This device'}),
+    h('p',{class:'hint',style:'margin-top:8px',text:'Signed in to '+state.repo+' ('+state.branch+')'+(state.name?' as '+state.name:'')+'.'}),
+    h('div',{class:'actions',style:'border:0;padding-top:12px'},
+      h('button',{type:'button',class:'btn ghost small',onclick:downloadBackup,text:'Download a backup copy'}),
+      h('button',{type:'button',class:'btn danger small',onclick:signOut,text:'Sign out'}))));
+  return box;
+}
+function downloadBackup(){
+  var blob=new Blob([JSON.stringify(serialize(state.data),null,2)],{type:'application/json'});
+  var a=h('a',{href:URL.createObjectURL(blob),download:'loaded-dice-content-'+todayLagos()+'.json'});
+  document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},500);
+}
+
+/* ------------------------------------------------------------------ validation */
+function validate(){
+  var errors=[],warnings=[],d=state.data;
+  d.events.forEach(function(e){
+    var n=clean(e.title)||'An event with no title';
+    if(!clean(e.title))errors.push('Every event needs a title.');
+    if(e.status!=='secret'){
+      if(!validDate(clean(e.date)))errors.push(n+': pick a date.');
+      if(clean(e.ticketUrl)&&!validUrl(clean(e.ticketUrl)))errors.push(n+': the tickets link must start with https://');
+      e.media.forEach(function(m){if(clean(m.url)&&!validUrl(clean(m.url)))errors.push(n+': "'+clean(m.url)+'" is not a full link. It should start with https://')});
+      if(e.status==='open'&&!clean(e.ticketUrl))warnings.push(n+' is open but has no tickets link, so visitors will see "Join the tribe" instead of "Get tickets".');
+    }
+  });
+  d.posts.forEach(function(p){
+    if(!clean(p.title))errors.push('Every journal post needs a title.');
+    else if(!storyToBody(p._story).length)errors.push('"'+clean(p.title)+'": the story is empty.');
+  });
+  ['whatsapp','instagram'].forEach(function(k){
+    var v=clean(d.links[k]);if(v&&!validUrl(v))errors.push('The '+k+' link must start with https://');
+  });
+  if(clean(d.links.email)&&!/^\S+@\S+\.\S+$/.test(clean(d.links.email)))errors.push('The contact email does not look right.');
+  return {errors:Array.from(new Set(errors)),warnings:warnings};
+}
+
+/* ------------------------------------------------------------------ saving */
+function usedPaths(out){
+  var u={};
+  out.events.forEach(function(e){if(e.poster)u[e.poster]=1;(e.images||[]).forEach(function(m){if(m.src)u[m.src]=1})});
+  out.posts.forEach(function(p){if(p.image)u[p.image]=1});
+  return u;
+}
+function commitMsg(what){return 'Admin: '+what+(state.name?' (by '+state.name+')':'')}
+function save(overwrite){
+  if(state.saving)return Promise.resolve();
+  var v=validate();
+  if(v.errors.length){setBanner({title:'Fix these before saving:',items:v.errors});return Promise.resolve()}
+  setBanner(null);
+  state.saving=true;updateBar();
+  var out,text,newSha;
+  return Promise.resolve().then(function(){
+    finalize(state.data);out=serialize(state.data);
+    var used=usedPaths(out),chain=Promise.resolve();
+    Object.keys(state.pending).forEach(function(path){
+      var p=state.pending[path];if(p.done||!used[path])return;
+      chain=chain.then(function(){return blobToB64(p.blob)}).then(function(b64){
+        return gh('PUT','/repos/'+state.repo+'/contents/'+cpath(path),{message:commitMsg('add picture '+path),content:b64,branch:state.branch});
+      }).then(function(){p.done=true});
+    });
+    return chain;
+  }).then(function(){
+    text=toContentJs(out);
+    return overwrite?gh('GET','/repos/'+state.repo+'/contents/content.js?ref='+encodeURIComponent(state.branch)).then(function(f){return f.sha}):state.sha;
+  }).then(function(sha){
+    return gh('PUT','/repos/'+state.repo+'/contents/content.js',{message:commitMsg('update site content'),content:utf8ToB64(text),sha:sha,branch:state.branch});
+  }).then(function(r){
+    state.sha=r.content.sha;state.orig=JSON.stringify(out);
+    toast('Saved. The site updates in about a minute or two.');
+    if(v.warnings.length)setBanner({kind:'ok',title:'Saved, with a heads-up:',items:v.warnings});
+  }).catch(function(e){
+    if(e&&(e.status===409||e.status===422)){
+      setBanner({title:'The site changed while you were editing.',text:'Someone else (or another device) saved since you opened this page. You can load their version and redo your edits, or save yours over theirs.',actions:[
+        {label:'Load the latest (my edits are lost)',cls:'ghost',fn:function(){reload()}},
+        {label:'Save mine over theirs',fn:function(){save(true)}}]});
+    }else setBanner({title:"Couldn't save.",text:friendly(e)});
+  }).then(function(){state.saving=false;renderApp()});
+}
+function reload(){
+  setBanner(null);
+  return loadContent().then(function(){state.openKey=null;renderApp();toast('Loaded the latest version.')})
+    .catch(function(e){setBanner({title:"Couldn't load the site content.",text:friendly(e)})});
+}
+
+/* ------------------------------------------------------------------ sign in / out */
+function loadContent(){
+  return gh('GET','/repos/'+state.repo+'/contents/content.js?ref='+encodeURIComponent(state.branch)).then(function(f){
+    var parsed=parseContentJs(b64ToUtf8(f.content));
+    state.sha=f.sha;state.data=normalize(parsed);finalize(state.data);
+    state.orig=JSON.stringify(serialize(state.data));state.pending={};
+  });
+}
+function signIn(creds){
+  state.token=clean(creds.token);state.name=clean(creds.name);state.remember=!!creds.remember;
+  state.repo=clean(creds.repo||DEFAULT_REPO).replace(/^https?:\/\/github\.com\//i,'').replace(/\.git$/,'').replace(/\/+$/,'');
+  if(!state.token){var e0=new Error('x');e0.friendly='Paste your access token first.';return Promise.reject(e0)}
+  return gh('GET','/repos/'+state.repo).then(function(info){
+    if(info.permissions&&info.permissions.push===false){var e1=new Error('x');e1.friendly="This token can look at the site but not change it. Make a new one with Contents set to Read and write.";throw e1}
+    state.branch=clean(creds.branch)||info.default_branch||'main';
+    return loadContent();
+  }).then(function(){saveCreds();state.openKey=null;state.tab='events';renderApp()});
+}
+function signOut(){
+  if(isDirty()&&!confirm('You have unsaved changes. Sign out anyway?'))return;
+  clearCreds();state.token='';state.data=null;state.banner=null;renderApp();
+}
+
+/* ------------------------------------------------------------------ rendering */
+function renderPanel(){
+  var y=window.scrollY,slot=$('#panel');if(!slot)return;
+  slot.textContent='';
+  slot.appendChild(state.tab==='events'?eventsPanel():state.tab==='posts'?postsPanel():settingsPanel());
+  document.querySelectorAll('.tab').forEach(function(t){t.setAttribute('aria-selected',t.dataset.tab===state.tab?'true':'false')});
+  updateBar();window.scrollTo(0,y);
+}
+function renderApp(){
+  var y0=window.scrollY,app=$('#app');app.textContent='';
+  if(!state.data){app.appendChild(loginView());return}
+  var site=location.pathname.replace(/[^\/]*$/,'')||'/';
+  app.appendChild(h('header',{class:'top'},h('div',{class:'wrap'},
+    h('div',{class:'brand'},'The Loaded Dice',h('small',{text:'Site admin'})),
+    h('span',{class:'state',id:'state',role:'status'}),
+    h('a',{class:'btn ghost small',href:site,target:'_blank',rel:'noopener',text:'View site'}),
+    h('button',{type:'button',class:'btn',id:'saveBtn',onclick:function(){save(false)},text:'Save changes'}))));
+  var tabs=h('div',{class:'tabs',role:'tablist'});
+  [['events','Events'],['posts','Journal'],['settings','Settings']].forEach(function(t){
+    tabs.appendChild(h('button',{type:'button',class:'tab',role:'tab','data-tab':t[0],onclick:function(){state.tab=t[0];state.openKey=null;state.banner=null;var bs=$('#bannerSlot');if(bs)bs.textContent='';renderPanel()},text:t[1]}));
+  });
+  app.appendChild(h('div',{class:'wrap'},tabs,h('div',{id:'bannerSlot'}),h('div',{id:'panel'}),
+    h('p',{class:'foot',text:'Tip: press Save changes when you finish. Nothing goes live until you do.'})));
+  drawBanner($('#bannerSlot'));
+  renderPanel();
+  window.scrollTo(0,y0);
+}
+function loginView(opts){
+  var saved=loadSaved()||{};
+  var msg=h('div',{id:'loginMsg'});
+  var token=h('input',{type:'password',autocomplete:'current-password',placeholder:'github_pat_…',value:saved.token||'',spellcheck:'false'});
+  var name=h('input',{type:'text',autocomplete:'name',placeholder:'Rotimi',value:saved.name||''});
+  var repo=h('input',{type:'text',value:saved.repo||DEFAULT_REPO,spellcheck:'false'});
+  var branch=h('input',{type:'text',placeholder:'main',value:saved.branch||'',spellcheck:'false'});
+  var remember=h('input',{type:'checkbox',checked:saved.remember!==false});
+  var go=h('button',{type:'submit',class:'btn',text:'Sign in'});
+  var form=h('form',{class:'form',onsubmit:function(ev){
+    ev.preventDefault();msg.textContent='';go.disabled=true;go.textContent='Checking…';
+    signIn({token:token.value,name:name.value,repo:repo.value,branch:branch.value,remember:remember.checked}).catch(function(e){
+      msg.textContent='';msg.appendChild(h('div',{class:'banner',role:'alert'},friendly(e)));
+      go.disabled=false;go.textContent='Sign in';
+    });
+  }},
+    field('Access token',token,'The long code from GitHub. It stays on this device and is only ever sent to GitHub.'),
+    field('Your name (optional)',name,'Shows up in the edit history so you know who changed what.'),
+    h('label',{class:'check'},remember,h('span',{text:'Keep me signed in on this device. Untick this on a shared computer.'})),
+    h('details',null,h('summary',{text:'Advanced'}),h('div',{class:'form'},field('Site repository',repo),field('Branch (leave blank for the default)',branch))),
+    msg,go);
+  return h('div',{class:'wrap'},h('div',{class:'login'},
+    h('h1',{text:'The Loaded Dice'}),
+    h('p',{class:'intro',style:'margin-top:8px',text:'Site admin. Sign in to change events, journal posts and photo links.'}),
+    h('div',{class:'card'},form,
+      h('details',null,h('summary',{text:'How do I get a token? (one time)'}),
+        h('ol',null,
+          h('li',{text:'Sign in to github.com with the Loaded Dice account.'}),
+          h('li',{text:'Open Settings, then Developer settings, then Personal access tokens, then Fine-grained tokens, then Generate new token.'}),
+          h('li',{text:'Name it "Loaded Dice admin". Set the expiry to the longest GitHub allows.'}),
+          h('li',{text:'Under Repository access choose "Only select repositories" and pick theloadeddice12-tech.github.io.'}),
+          h('li',{text:'Under Repository permissions find Contents and set it to "Read and write".'}),
+          h('li',{text:'Press Generate token, copy the code straight away (GitHub only shows it once) and paste it above.'}))))));
+}
+
+/* ------------------------------------------------------------------ start */
+(function init(){
+  var saved=loadSaved();
+  renderApp();
+  if(saved&&saved.token){
+    var app=$('#app');app.textContent='';app.appendChild(h('div',{class:'wrap'},h('p',{class:'intro',style:'margin-top:20vh;text-align:center',text:'Opening the site…'})));
+    signIn(saved).catch(function(e){
+      renderApp();
+      var m=$('#loginMsg');if(m)m.appendChild(h('div',{class:'banner',role:'alert'},friendly(e)));
+    });
+  }
+})();
+})();
+</script>
+</body>
+</html>

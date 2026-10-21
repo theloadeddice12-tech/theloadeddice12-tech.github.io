@@ -36,6 +36,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth;scroll-padding-top:84px}
 body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
 img{max-width:100%;height:auto;display:block}
@@ -129,6 +130,7 @@ p{margin:0}
 .facts dd small{display:block;color:var(--muted);font-size:15px}
 .facts a{color:var(--gold-hi)}
 .price{font:400 32px/1 var(--f-display);color:var(--tape)}
+.case.nopost{grid-template-columns:minmax(0,1fr)}
 @media(max-width:820px){.case{grid-template-columns:1fr}.poster img{max-height:70vh}.facts div{grid-template-columns:1fr;gap:2px}}
 
 /* how */
@@ -152,9 +154,9 @@ p{margin:0}
 .string{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
 .string path{fill:none;stroke:var(--blood-hi);stroke-width:2.5;stroke-linecap:round;filter:drop-shadow(0 3px 3px rgba(0,0,0,.6))}
 .file{position:relative;background:var(--paper);color:var(--paper-ink);padding:34px 22px 24px;box-shadow:0 14px 30px rgba(0,0,0,.5);min-width:0}
-.file:nth-child(1){transform:rotate(-1.8deg)}
-.file:nth-child(2){transform:rotate(1.2deg);margin-top:22px}
-.file:nth-child(3){transform:rotate(-.8deg);margin-top:8px}
+.file:nth-child(3n+1){transform:rotate(-1.8deg)}
+.file:nth-child(3n+2){transform:rotate(1.2deg);margin-top:22px}
+.file:nth-child(3n){transform:rotate(-.8deg);margin-top:8px}
 .pin{position:absolute;top:10px;left:50%;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff7a85,var(--blood) 60%,#5a0c14);box-shadow:0 3px 5px rgba(0,0,0,.5);z-index:4}
 .stamp{position:absolute;top:30px;right:14px;transform:rotate(9deg);font:400 15px/1 var(--f-type);padding:5px 9px;border:3px solid;letter-spacing:.06em;text-transform:uppercase;background:rgba(234,223,200,.7)}
 .stamp.closed{color:#7d1219;border-color:#7d1219}
@@ -164,6 +166,21 @@ p{margin:0}
 .file .meta{font:400 15px/1.45 var(--f-type);margin-top:8px;color:#4a3a2a}
 .file p.blurb{margin-top:14px;font-size:16px;line-height:1.55}
 .file .btn{margin-top:18px;color:#fff}
+.file .btns{display:flex;flex-wrap:wrap;gap:0 10px}
+.thumbs{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.thumb{padding:0;border:3px solid var(--paper-ink);background:var(--paper-ink);cursor:zoom-in;line-height:0;width:76px;height:96px;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb:hover{border-color:var(--blood)}
+.case-copy .thumbs{margin-top:24px}
+.case-copy .thumb{width:104px;height:130px;border-color:var(--paper);background:var(--paper)}
+.case-copy .thumb:hover{border-color:var(--tape)}
+.lightbox{position:fixed;inset:0;z-index:120;background:rgba(5,2,2,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:56px 16px 24px}
+.lightbox img{max-width:min(94vw,1100px);max-height:78vh;width:auto;height:auto;object-fit:contain;background:#000}
+.lightbox .cap{color:var(--muted);font-size:16px;min-height:1.5em;text-align:center;max-width:36em}
+.lightbox button{position:absolute;min-height:48px;min-width:48px;padding:8px 16px;background:var(--paper-ink);color:var(--paper);border:1px solid var(--gold);font:700 16px var(--f-body);cursor:pointer}
+.lightbox .lbx{top:max(12px,env(safe-area-inset-top,0px));right:12px}
+.lightbox .lbp,.lightbox .lbn{top:50%;margin-top:-24px;font-size:22px;padding:8px 14px}
+.lightbox .lbp{left:8px}.lightbox .lbn{right:8px}
 .file .btn.ghost{color:var(--paper-ink);border-color:var(--paper-ink)}
 .file .btn.ghost:hover{background:var(--paper-ink);color:var(--paper)}
 .file .note{margin-top:18px;font-size:15px;color:#4a3a2a}
@@ -202,6 +219,7 @@ p{margin:0}
 .reader-card{position:relative;width:100%;max-width:720px;background:var(--paper);color:var(--paper-ink);padding:clamp(24px,5vw,56px);margin-block:auto}
 .reader-card h2{font-size:clamp(32px,5vw,52px);color:var(--paper-ink)}
 .reader-card time{display:block;margin-bottom:14px;font:400 15px/1 var(--f-type);color:#6b2a2a}
+.reader-card .cover{width:100%;max-height:420px;object-fit:cover;margin-bottom:22px;border:1px solid rgba(26,20,16,.25)}
 .reader-card .body{margin-top:24px;display:grid;gap:16px;font-size:18px;line-height:1.7}
 .reader-card .x{position:absolute;top:10px;right:10px;min-height:44px;padding:8px 14px;background:var(--paper-ink);color:var(--paper);border:0;font:700 15px var(--f-body);cursor:pointer}
 
@@ -269,7 +287,7 @@ footer{background:var(--ink);padding-block:48px 40px}
     </a>
     <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="links">Menu</button>
     <nav class="links" id="links" aria-label="Main">
-      <a href="#case">The case</a>
+      <a href="#case" id="navCase">The case</a>
       <a href="#how">How it works</a>
       <a href="#archive">Case files</a>
       <a href="#dress">Dress code</a>
@@ -289,8 +307,8 @@ footer{background:var(--ink);padding-block:48px 40px}
       <h1>Your friends are suspects.<em>Trust no one.</em></h1>
       <p class="lead">Lagos' first roving murder mystery party. <strong>A party, games and a crime scene.</strong> A new venue and a new victim each time, in a room full of people who swear they didn't do it.</p>
       <div class="cta-row">
-        <a class="btn" data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Get tickets for Èkó After Dark</a>
-        <a class="btn ghost" data-link="whatsapp" href="https://chat.whatsapp.com/KDs0jEbpfRT4gBWcntghli" target="_blank" rel="noopener">Join the Loaded Tribe</a>
+        <a class="btn" id="ctaMain" data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Get tickets for Èkó After Dark</a>
+        <a class="btn ghost" id="ctaTribe" data-link="whatsapp" href="https://chat.whatsapp.com/KDs0jEbpfRT4gBWcntghli" target="_blank" rel="noopener">Join the Loaded Tribe</a>
       </div>
       <div class="countdown" id="countdown" aria-live="off">
         <b id="days">24</b>
@@ -307,27 +325,28 @@ footer{background:var(--ink);padding-block:48px 40px}
 <div class="divider" role="presentation"></div>
 
 <section class="band" id="case">
-  <div class="in case">
-    <div class="poster"><img src="poster-portrait.webp" alt="Èkó After Dark poster: a woman in a red gele looking over Lagos lagoon at dusk, with a table of dice, a mask and crime-scene photos" width="900" height="1125"></div>
+  <div class="in case" id="caseGrid">
+    <div class="poster" id="casePoster"><img id="casePosterImg" src="poster-portrait.webp" alt="Èkó After Dark poster: a woman in a red gele looking over Lagos lagoon at dusk, with a table of dice, a mask and crime-scene photos" width="900" height="1125"></div>
     <div class="case-copy">
-      <h2>Èkó After Dark</h2>
-      <p class="sub2">An Ìsàlẹ̀ Èkó Special</p>
-      <p class="sub" style="margin-top:20px;max-width:32em">A cooperative's annual dinner. Speeches, music, good food and a room full of smiling faces. By the end of the night, someone will not be leaving, and everybody has a secret worth killing for.</p>
-      <dl class="facts">
+      <h2 id="caseTitle">Èkó After Dark</h2>
+      <p class="sub2" id="caseTag">An Ìsàlẹ̀ Èkó Special</p>
+      <p class="sub" id="caseDesc" style="margin-top:20px;max-width:32em">A cooperative's annual dinner. Speeches, music, good food and a room full of smiling faces. By the end of the night, someone will not be leaving, and everybody has a secret worth killing for.</p>
+      <dl class="facts" id="caseFacts">
         <div><dt>When</dt><dd>Saturday, 7 November 2026</dd></div>
         <div><dt>Where</dt><dd>Adrenaline Lounge<small>49 Lawani Street, Akoka, Yaba, Lagos. <a id="mapLink" href="https://www.google.com/maps/search/?api=1&amp;query=Adrenaline+Lounge+49+Lawani+Street+Akoka+Yaba+Lagos" target="_blank" rel="noopener">Open in Maps</a></small></dd></div>
         <div><dt>Tickets</dt><dd><span class="price">₦7,500</span> early bird<small>Goes up to ₦10,000 for standard tickets.</small></dd></div>
         <div><dt>Wear</dt><dd>Trendy traditional Nigerian. Dress to impress.</dd></div>
       </dl>
+      <div id="caseGallery"></div>
       <div class="cta-row">
-        <a class="btn" data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Get tickets</a>
+        <a class="btn" id="caseTickets" data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Get tickets</a>
         <a class="btn ghost" href="#how">How the night works</a>
       </div>
     </div>
   </div>
 </section>
 
-<div class="tape-edge" role="presentation"></div>
+<div class="tape-edge" id="edgeCase" role="presentation"></div>
 
 <section class="band" id="how">
   <div class="in">
@@ -474,12 +493,12 @@ footer{background:var(--ink);padding-block:48px 40px}
     <div class="foot">
       <div>
         <a class="brand" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="6" fill="#a31c27" stroke="#d6ab52" stroke-width="2"/><circle cx="10" cy="10" r="2.6" fill="#f2d58c"/><circle cx="22" cy="10" r="2.6" fill="#f2d58c"/><circle cx="16" cy="16" r="2.6" fill="#f2d58c"/><circle cx="10" cy="22" r="2.6" fill="#f2d58c"/><circle cx="22" cy="22" r="2.6" fill="#f2d58c"/></svg>The Loaded Dice</a>
-        <p style="margin-top:12px">A party, games and a crime scene.<br>Next case: Èkó After Dark, 7 November 2026.<br>Adrenaline Lounge, 49 Lawani Street, Akoka, Yaba.</p>
+        <p style="margin-top:12px" id="footLine">A party, games and a crime scene.<br>Next case: Èkó After Dark, 7 November 2026.<br>Adrenaline Lounge, 49 Lawani Street, Akoka, Yaba.</p>
       </div>
       <div>
         <h4>Explore</h4>
         <ul>
-          <li><a href="#case">The case</a></li>
+          <li id="footCase"><a href="#case">The case</a></li>
           <li><a href="#how">How it works</a></li>
           <li><a href="#archive">Case files</a></li>
           <li><a href="#journal">Journal</a></li>
@@ -489,7 +508,7 @@ footer{background:var(--ink);padding-block:48px 40px}
       <div>
         <h4>Find us</h4>
         <ul>
-          <li><a data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Tickets</a></li>
+          <li id="footTickets"><a data-link="tickets" href="https://clooza.com/events/WHODIDIT" target="_blank" rel="noopener">Tickets</a></li>
           <li><a data-link="whatsapp" href="https://chat.whatsapp.com/KDs0jEbpfRT4gBWcntghli" target="_blank" rel="noopener">WhatsApp community</a></li>
           <li><a data-link="instagram" href="https://www.instagram.com/the_loadeddice" target="_blank" rel="noopener">Instagram</a></li>
           <li><a href="#join">Email</a></li>
@@ -500,6 +519,14 @@ footer{background:var(--ink);padding-block:48px 40px}
   </div>
 </footer>
 
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Picture viewer">
+  <button class="lbx" type="button" id="lbClose">Close</button>
+  <button class="lbp" type="button" id="lbPrev" aria-label="Previous picture">&#8592;</button>
+  <img id="lbImg" alt="">
+  <p class="cap" id="lbCap"></p>
+  <button class="lbn" type="button" id="lbNext" aria-label="Next picture">&#8594;</button>
+</div>
+
 <div class="reader" id="reader" hidden role="dialog" aria-modal="true" aria-labelledby="readerTitle">
   <article class="reader-card">
     <button class="x" type="button" id="readerClose">Close</button>
@@ -509,121 +536,265 @@ footer{background:var(--ink);padding-block:48px 40px}
   </article>
 </div>
 
-<script src="content.js"></script>
 <script>
 (function(){
   var $=function(s,r){return (r||document).querySelector(s)};
   var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
 
-  /* links kept in one place */
-  $$('[data-link]').forEach(function(a){
-    var k=a.getAttribute('data-link');
-    if(k==='emailMerch'){a.href='mailto:'+LINKS.email+'?subject='+encodeURIComponent('Tell me when the merch drops');return}
-    if(k==='email'){a.href='mailto:'+LINKS.email;return}
-    if(LINKS[k]) a.href=LINKS[k];
-  });
-  $('#mailbox').textContent=LINKS.email;
+  /* ---------- helpers ---------- */
+  var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+  function safeUrl(u){u=String(u==null?'':u).trim();return /^https?:\/\//i.test(u)?u:''}
+  function safePath(p){p=String(p==null?'':p).trim();return /^[A-Za-z0-9_\-.\/]+$/.test(p)&&p.indexOf('..')<0&&p.charAt(0)!=='/'?p:''}
+  function parts(iso){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?{y:+m[1],m:+m[2],d:+m[3]}:null}
+  function dmy(iso){var p=parts(iso);return p?p.d+' '+MONTHS[p.m-1]+' '+p.y:''}
+  function dm(iso){var p=parts(iso);return p?p.d+' '+MONTHS[p.m-1]:''}
+  function weekday(iso){var p=parts(iso);return p?DAYS[new Date(Date.UTC(p.y,p.m-1,p.d)).getUTCDay()]:''}
+  function setText(el,t){if(el)el.textContent=t}
 
-  /* tape text */
-  var tapeText=['Èkó After Dark','Saturday 7 November','Adrenaline Lounge, Yaba','A party, games and a crime scene','Trust no one'];
-  var html='';for(var i=0;i<4;i++){tapeText.forEach(function(t){html+='<span>'+t+'</span>'})}
-  $('#trackA').innerHTML=html;
+  /* ---------- everything that needs the content file ---------- */
+  function start(){
+    var S=window.SITE||{};
+    var L=S.links||{};
+    var EV=(S.events||[]).filter(function(e){return e&&e.title});
+    var POSTS=(S.posts||[]).filter(function(p){return p&&p.id&&p.title});
 
-  /* mobile menu */
-  var mb=$('#menuBtn'),lk=$('#links');
-  mb.addEventListener('click',function(){var o=lk.classList.toggle('open');mb.setAttribute('aria-expanded',o);mb.textContent=o?'Close':'Menu'});
-  $$('#links a').forEach(function(a){a.addEventListener('click',function(){lk.classList.remove('open');mb.setAttribute('aria-expanded','false');mb.textContent='Menu'})});
+    /* oldest first, secret/undated cases last */
+    EV.sort(function(a,b){
+      var da=parts(a.date)?a.date:'9999',db=parts(b.date)?b.date:'9999';
+      return da<db?-1:da>db?1:0;
+    });
+    /* the case on the front page: the open event happening soonest */
+    var featured=EV.filter(function(e){return e.status==='open'})[0]||null;
+    var secret=EV.filter(function(e){return e.status==='secret'})[0]||null;
+    var ticketUrl=featured?safeUrl(featured.ticketUrl):'';
 
-  /* countdown, in whole days (Lagos time) */
-  function days(){
-    var p=NEXT_EVENT_DATE.split('-'),now=new Date();
-    var lagos=new Date(now.getTime()+(60+now.getTimezoneOffset())*60000);
-    var a=Date.UTC(lagos.getFullYear(),lagos.getMonth(),lagos.getDate());
-    var b=Date.UTC(+p[0],+p[1]-1,+p[2]);
-    return Math.round((b-a)/86400000);
-  }
-  var d=days(),dEl=$('#days'),lEl=$('#dayslabel');
-  if(d>1){dEl.textContent=d;lEl.innerHTML='days until the doors open<br>on Saturday, 7 November'}
-  else if(d===1){dEl.textContent='1';lEl.innerHTML='day to go.<br>Tomorrow night, 7 November'}
-  else if(d===0){dEl.textContent='Tonight';lEl.innerHTML='the party starts.<br>Adrenaline Lounge, Yaba'}
-  else{dEl.textContent='Closed';lEl.innerHTML='the case is closed.<br>Case 03 is coming'}
+    /* small pictures for an event, tap to see them bigger */
+    var GALS=[];
+    function galHtml(e){
+      var imgs=(e.images||[]).map(function(m){return {src:safePath(m.src),alt:m.alt||''}}).filter(function(m){return m.src});
+      if(!imgs.length)return '';
+      var gi=GALS.push(imgs)-1;
+      return '<div class="thumbs">'+imgs.map(function(m,i){
+        return '<button type="button" class="thumb" data-gal="'+gi+'" data-i="'+i+'" aria-label="'+esc(m.alt||('Picture '+(i+1)+' from '+e.title))+'"><img src="'+esc(m.src)+'" alt="" loading="lazy"></button>';
+      }).join('')+'</div>';
+    }
 
-  /* flashlight in the hero follows the pointer */
-  var hero=$('#hero');
-  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    hero.addEventListener('pointermove',function(e){
-      var r=hero.getBoundingClientRect();
-      hero.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
-      hero.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+    /* links kept in one place */
+    var email=L.email||'theloadeddice12@gmail.com';
+    $$('[data-link]').forEach(function(a){
+      var k=a.getAttribute('data-link');
+      if(k==='emailMerch'){a.href='mailto:'+email+'?subject='+encodeURIComponent('Tell me when the merch drops');return}
+      if(k==='email'){a.href='mailto:'+email;return}
+      if(k==='tickets'){if(ticketUrl){a.href=ticketUrl}else{a.hidden=true;if(a.parentNode&&a.parentNode.tagName==='LI')a.parentNode.hidden=true}return}
+      var u=safeUrl(L[k]);if(u)a.href=u;
+    });
+    setText($('#mailbox'),email);
+
+    /* hero buttons: tickets when something is on sale, otherwise the tribe */
+    var main=$('#ctaMain'),tribe=$('#ctaTribe');
+    if(featured&&ticketUrl){main.textContent='Get tickets for '+featured.title}
+    else{
+      main.hidden=false;main.textContent='Join the Loaded Tribe';main.href=safeUrl(L.whatsapp)||'#join';
+      main.removeAttribute('data-link');tribe.hidden=true;
+    }
+
+    /* the open case section */
+    var caseSec=$('#case');
+    if(!featured){
+      caseSec.hidden=true;$('#edgeCase').hidden=true;$('#navCase').hidden=true;$('#footCase').hidden=true;
+    }else{
+      setText($('#caseTitle'),featured.title);
+      var tag=$('#caseTag');tag.textContent=featured.tagline||'';tag.hidden=!featured.tagline;
+      var desc=$('#caseDesc');desc.textContent=featured.description||featured.blurb||'';desc.hidden=!desc.textContent;
+      var rows='';
+      if(parts(featured.date))rows+='<div><dt>When</dt><dd>'+esc(weekday(featured.date)+', '+dmy(featured.date))+'</dd></div>';
+      if(featured.venue||featured.address){
+        var q=encodeURIComponent([featured.venue,featured.address].filter(Boolean).join(' ').replace(/,/g,' ').replace(/\s+/g,' ').trim()).replace(/%20/g,'+');
+        rows+='<div><dt>Where</dt><dd>'+esc(featured.venue||featured.address)+'<small>'+(featured.venue&&featured.address?esc(featured.address)+'. ':'')+'<a id="mapLink" href="https://www.google.com/maps/search/?api=1&amp;query='+q+'" target="_blank" rel="noopener">Open in Maps</a></small></dd></div>';
+      }
+      if(featured.price){
+        rows+='<div><dt>Tickets</dt><dd><span class="price">'+esc(featured.price)+'</span>'+(featured.priceLabel?' '+esc(featured.priceLabel):'')+(featured.priceNote?'<small>'+esc(featured.priceNote)+'</small>':'')+'</dd></div>';
+      }
+      if(featured.wear)rows+='<div><dt>Wear</dt><dd>'+esc(featured.wear)+'</dd></div>';
+      var facts=$('#caseFacts');facts.innerHTML=rows;facts.hidden=!rows;
+      $('#caseGallery').innerHTML=galHtml(featured);
+      var poster=safePath(featured.poster);
+      if(poster){
+        var img=$('#casePosterImg');img.src=poster;img.alt=featured.posterAlt||('Poster for '+featured.title);
+        $('#casePoster').hidden=false;$('#caseGrid').classList.remove('nopost');
+      }else{$('#casePoster').hidden=true;$('#caseGrid').classList.add('nopost')}
+    }
+
+    /* tape text */
+    var tapeText=[];
+    if(featured){
+      tapeText.push(featured.title);
+      if(parts(featured.date))tapeText.push(weekday(featured.date)+' '+dm(featured.date));
+      var vl=[featured.venue,featured.area].filter(Boolean).join(', ');if(vl)tapeText.push(vl);
+    }else{tapeText.push('The Loaded Dice');tapeText.push('The next case is classified')}
+    tapeText.push('A party, games and a crime scene');tapeText.push('Trust no one');
+    var html='';for(var i=0;i<4;i++){tapeText.forEach(function(t){html+='<span>'+esc(t)+'</span>'})}
+    $('#trackA').innerHTML=html;
+
+    /* footer line */
+    var fl='A party, games and a crime scene.';
+    if(featured){
+      fl+='<br>Next case: '+esc(featured.title)+(parts(featured.date)?', '+esc(dmy(featured.date)):'')+'.';
+      var addr=[featured.venue,featured.address].filter(Boolean).join(', ');if(addr)fl+='<br>'+esc(addr)+'.';
+    }else{fl+='<br>The next case is classified. Join the tribe to hear first.'}
+    $('#footLine').innerHTML=fl;
+
+    /* mobile menu */
+    var mb=$('#menuBtn'),lk=$('#links');
+    mb.addEventListener('click',function(){var o=lk.classList.toggle('open');mb.setAttribute('aria-expanded',o);mb.textContent=o?'Close':'Menu'});
+    $$('#links a').forEach(function(a){a.addEventListener('click',function(){lk.classList.remove('open');mb.setAttribute('aria-expanded','false');mb.textContent='Menu'})});
+
+    /* countdown, in whole days (Lagos time) */
+    function days(iso){
+      var p=parts(iso),now=new Date();
+      var lagos=new Date(now.getTime()+(60+now.getTimezoneOffset())*60000);
+      var a=Date.UTC(lagos.getFullYear(),lagos.getMonth(),lagos.getDate());
+      var b=Date.UTC(p.y,p.m-1,p.d);
+      return Math.round((b-a)/86400000);
+    }
+    var dEl=$('#days'),lEl=$('#dayslabel');
+    if(featured&&parts(featured.date)){
+      var d=days(featured.date);
+      if(d>1){dEl.textContent=d;lEl.innerHTML='days until the doors open<br>on '+esc(weekday(featured.date)+', '+dm(featured.date))}
+      else if(d===1){dEl.textContent='1';lEl.innerHTML='day to go.<br>Tomorrow night, '+esc(dm(featured.date))}
+      else if(d===0){dEl.textContent='Tonight';lEl.innerHTML='the party starts.<br>'+esc([featured.venue,featured.area].filter(Boolean).join(', '))}
+      else{dEl.textContent='Closed';lEl.innerHTML='the case is closed.<br>'+esc(secret?secret.title:'The next case')+' is coming'}
+    }else{
+      dEl.textContent='Soon';lEl.innerHTML='the next case is coming.<br>Join the tribe to hear first';
+    }
+
+    /* flashlight in the hero follows the pointer */
+    var hero=$('#hero');
+    if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      hero.addEventListener('pointermove',function(e){
+        var r=hero.getBoundingClientRect();
+        hero.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+        hero.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+      });
+    }
+
+    /* case files */
+    var grid=$('#boardGrid');
+    EV.forEach(function(e){
+      var st=['open','closed','secret'].indexOf(e.status)>=0?e.status:'closed';
+      var stampTxt=st==='closed'?'Case closed':st==='open'?'Case open':'Classified';
+      var el=document.createElement('article');el.className='file';
+      var meta=st==='secret'?(e.meta||'Venue and date are classified'):[dmy(e.date),e.venue,e.area].filter(Boolean).join(', ');
+      var h='<span class="pin"></span><span class="stamp '+st+'">'+stampTxt+'</span><h3>'+esc(e.title)+'</h3><p class="meta">'+esc(meta)+'</p>';
+      if(st==='secret'){
+        h+='<p class="blurb">The next victim has <span class="redact" aria-hidden="true">not been chosen</span> yet. Join the tribe and you will hear first.</p>';
+        h+=galHtml(e);
+        h+='<a class="btn ghost" href="#join">Join the tribe</a>';
+      }else{
+        h+='<p class="blurb">'+esc(e.blurb)+'</p>';
+        h+=galHtml(e);
+        if(st==='open'){
+          var tu=safeUrl(e.ticketUrl);
+          h+=tu?'<a class="btn" href="'+esc(tu)+'" target="_blank" rel="noopener">Get tickets</a>':'<a class="btn ghost" href="#join">Join the tribe</a>';
+        }else{
+          var media=(e.media||[]).filter(function(m){return m&&safeUrl(m.url)});
+          if(media.length){
+            h+='<div class="btns">'+media.map(function(m){
+              return '<a class="btn ghost" href="'+esc(safeUrl(m.url))+'" target="_blank" rel="noopener">'+esc(m.label||'Get your photos')+'</a>';
+            }).join('')+'</div>';
+          }else{
+            h+='<p class="note">Photos and video from this night are on the way. Were you there? <a href="#join">Send us yours.</a></p>';
+          }
+        }
+      }
+      el.innerHTML=h;grid.appendChild(el);
+    });
+
+    /* red string between pins (a new row starts a new string) */
+    var board=$('#board'),svg=$('#string');
+    function draw(){
+      var br=board.getBoundingClientRect(),pins=$$('.pin',board);
+      svg.setAttribute('viewBox','0 0 '+br.width+' '+br.height);
+      var pts=pins.map(function(p){var r=p.getBoundingClientRect();return [r.left-br.left+r.width/2,r.top-br.top+r.height/2]});
+      var dstr='';
+      for(var i=0;i<pts.length-1;i++){
+        var a=pts[i],b=pts[i+1];
+        if(b[0]<a[0]-60)continue;
+        var mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2+38;
+        dstr+='<path d="M'+a[0]+' '+a[1]+' Q'+mx+' '+my+' '+b[0]+' '+b[1]+'"/>';
+      }
+      svg.innerHTML=dstr;
+    }
+    window.addEventListener('resize',draw);window.addEventListener('load',draw);
+    if(document.fonts&&document.fonts.ready){document.fonts.ready.then(draw)}
+    draw();setTimeout(draw,400);
+
+    /* journal */
+    var postsEl=$('#posts');
+    var styleBtn=$('.cta-row [data-post]');
+    if(styleBtn&&!POSTS.some(function(p){return p.id===styleBtn.getAttribute('data-post')}))styleBtn.hidden=true;
+    POSTS.forEach(function(p){
+      var b=document.createElement('button');b.type='button';b.className='post';b.setAttribute('data-post',p.id);
+      b.innerHTML='<time>'+esc(p.date)+'</time><h3>'+esc(p.title)+'</h3><p>'+esc(p.summary)+'</p><span class="more">Read the story</span>';
+      postsEl.appendChild(b);
+    });
+    var reader=$('#reader'),lastFocus=null;
+    function openPost(id){
+      var p=POSTS.filter(function(x){return x.id===id})[0];if(!p)return;
+      lastFocus=document.activeElement;
+      $('#readerDate').textContent=p.date||'';$('#readerTitle').textContent=p.title;
+      var cover=safePath(p.image);
+      $('#readerBody').innerHTML=(cover?'<img class="cover" src="'+esc(cover)+'" alt="">':'')+(p.body||[]).map(function(t){return '<p>'+esc(t)+'</p>'}).join('');
+      reader.hidden=false;document.body.style.overflow='hidden';$('#readerClose').focus();
+    }
+    function closePost(){reader.hidden=true;document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+    document.addEventListener('click',function(e){
+      var t=e.target.closest('[data-post]');if(t){openPost(t.getAttribute('data-post'))}
+    });
+    $('#readerClose').addEventListener('click',closePost);
+    reader.addEventListener('click',function(e){if(e.target===reader)closePost()});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!reader.hidden)closePost()});
+
+    /* picture viewer */
+    var lb=$('#lightbox'),lbImg=$('#lbImg'),lbCap=$('#lbCap'),cur=null,ci=0,lbFrom=null;
+    function showLb(){
+      var m=cur[ci];lbImg.src=m.src;lbImg.alt=m.alt;lbCap.textContent=m.alt;
+      $('#lbPrev').hidden=$('#lbNext').hidden=cur.length<2;
+    }
+    function closeLb(){lb.hidden=true;lbImg.removeAttribute('src');if(!reader||reader.hidden)document.body.style.overflow='';if(lbFrom&&lbFrom.focus)lbFrom.focus()}
+    function stepLb(n){if(!cur)return;ci=(ci+n+cur.length)%cur.length;showLb()}
+    document.addEventListener('click',function(e){
+      var t=e.target.closest('[data-gal]');if(!t)return;
+      cur=GALS[+t.getAttribute('data-gal')];ci=+t.getAttribute('data-i');lbFrom=t;
+      showLb();lb.hidden=false;document.body.style.overflow='hidden';$('#lbClose').focus();
+    });
+    $('#lbClose').addEventListener('click',closeLb);
+    $('#lbPrev').addEventListener('click',function(){stepLb(-1)});
+    $('#lbNext').addEventListener('click',function(){stepLb(1)});
+    lb.addEventListener('click',function(e){if(e.target===lb)closeLb()});
+    document.addEventListener('keydown',function(e){
+      if(lb.hidden)return;
+      if(e.key==='Escape')closeLb();else if(e.key==='ArrowLeft')stepLb(-1);else if(e.key==='ArrowRight')stepLb(1);
+    });
+
+    /* copy email */
+    $('#copyMail').addEventListener('click',function(){
+      var btn=this,box=$('#mailbox');
+      function sel(){var r=document.createRange();r.selectNodeContents(box);var s=window.getSelection();s.removeAllRanges();s.addRange(r)}
+      function done(t){btn.textContent=t;setTimeout(function(){btn.textContent='Copy address'},2200)}
+      try{navigator.clipboard.writeText(email).then(function(){done('Copied')},function(){sel();done('Press copy now')})}
+      catch(err){sel();done('Press copy now')}
     });
   }
 
-  /* case files */
-  var grid=$('#boardGrid');
-  EPISODES.forEach(function(e){
-    var st=e.status,stampTxt=st==='closed'?'Case closed':st==='open'?'Case open':'Classified';
-    var el=document.createElement('article');el.className='file';
-    var h='<span class="pin"></span><span class="stamp '+st+'">'+stampTxt+'</span><h3>'+e.title+'</h3><p class="meta">'+e.meta+'</p>';
-    if(st==='secret'){
-      h+='<p class="blurb">The next victim has <span class="redact" aria-hidden="true">not been chosen</span> yet. Join the tribe and you will hear first.</p>';
-      h+='<a class="btn ghost" href="#join">Join the tribe</a>';
-    }else{
-      h+='<p class="blurb">'+e.blurb+'</p>';
-      if(st==='open'){h+='<a class="btn" href="'+e.ticketUrl+'" target="_blank" rel="noopener">Get tickets</a>'}
-      else if(e.albumUrl){h+='<a class="btn ghost" href="'+e.albumUrl+'" target="_blank" rel="noopener">Relive the night</a>'}
-      else{h+='<p class="note">Photos and video from this night are on the way. Were you there? <a href="#join">Send us yours.</a></p>'}
-    }
-    el.innerHTML=h;grid.appendChild(el);
-  });
-
-  /* red string between pins */
-  var board=$('#board'),svg=$('#string');
-  function draw(){
-    var br=board.getBoundingClientRect(),pins=$$('.pin',board);
-    svg.setAttribute('viewBox','0 0 '+br.width+' '+br.height);
-    var pts=pins.map(function(p){var r=p.getBoundingClientRect();return [r.left-br.left+r.width/2,r.top-br.top+r.height/2]});
-    var dstr='';
-    for(var i=0;i<pts.length-1;i++){
-      var a=pts[i],b=pts[i+1],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2+38;
-      dstr+='<path d="M'+a[0]+' '+a[1]+' Q'+mx+' '+my+' '+b[0]+' '+b[1]+'"/>';
-    }
-    svg.innerHTML=dstr;
-  }
-  window.addEventListener('resize',draw);window.addEventListener('load',draw);
-  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(draw)}
-  draw();setTimeout(draw,400);
-
-  /* journal */
-  var posts=$('#posts');
-  POSTS.forEach(function(p){
-    var b=document.createElement('button');b.type='button';b.className='post';b.setAttribute('data-post',p.id);
-    b.innerHTML='<time>'+p.date+'</time><h3>'+p.title+'</h3><p>'+p.summary+'</p><span class="more">Read the story</span>';
-    posts.appendChild(b);
-  });
-  var reader=$('#reader'),lastFocus=null;
-  function openPost(id){
-    var p=POSTS.filter(function(x){return x.id===id})[0];if(!p)return;
-    lastFocus=document.activeElement;
-    $('#readerDate').textContent=p.date;$('#readerTitle').textContent=p.title;
-    $('#readerBody').innerHTML=p.body.map(function(t){return '<p>'+t+'</p>'}).join('');
-    reader.hidden=false;document.body.style.overflow='hidden';$('#readerClose').focus();
-  }
-  function closePost(){reader.hidden=true;document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus()}
-  document.addEventListener('click',function(e){
-    var t=e.target.closest('[data-post]');if(t){openPost(t.getAttribute('data-post'))}
-  });
-  $('#readerClose').addEventListener('click',closePost);
-  reader.addEventListener('click',function(e){if(e.target===reader)closePost()});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!reader.hidden)closePost()});
-
-  /* copy email */
-  $('#copyMail').addEventListener('click',function(){
-    var btn=this,box=$('#mailbox');
-    function sel(){var r=document.createRange();r.selectNodeContents(box);var s=window.getSelection();s.removeAllRanges();s.addRange(r)}
-    function done(t){btn.textContent=t;setTimeout(function(){btn.textContent='Copy address'},2200)}
-    try{navigator.clipboard.writeText(LINKS.email).then(function(){done('Copied')},function(){sel();done('Press copy now')})}
-    catch(err){sel();done('Press copy now')}
-  });
+  /* load the content file (the minute in the address keeps edits from sticking in the browser cache) */
+  var s=document.createElement('script');
+  s.src='content.js?v='+Math.floor(Date.now()/60000);
+  s.onload=start;
+  s.onerror=start;
+  document.head.appendChild(s);
 })();
 </script>
 
