@@ -192,9 +192,18 @@ p{margin:0}
 /* dress */
 #dress{background:linear-gradient(180deg,var(--ink) 0,#1a0a0d 100%)}
 .dress{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(28px,5vw,72px);align-items:center}
+.dress.multi{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.dress.nopost{grid-template-columns:minmax(0,1fr)}
+.looks{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:clamp(22px,3vw,40px)}
+.look-fig{margin:0;display:flex;flex-direction:column;align-items:center;gap:20px;flex:1 1 220px;max-width:340px;min-width:0}
+.look-fig:nth-child(even) .look{transform:rotate(-1.4deg)}
+.look-cap{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.look-cap b{font:400 24px/1.1 var(--f-display);color:var(--gold-hi)}
+.looks .look img{max-height:min(60vh,480px)}
 .look{position:relative;justify-self:center;width:fit-content;max-width:100%;transform:rotate(1.6deg);border:8px solid var(--paper);box-shadow:0 30px 60px rgba(0,0,0,.6);background:var(--paper)}
 .look img{width:auto;max-width:100%;max-height:min(72vh,560px);height:auto}
-.look::after{content:"Part one";position:absolute;right:-14px;bottom:26px;transform:rotate(-4deg);background:var(--tape);color:var(--tape-ink);font:400 24px/1 var(--f-hand);padding:8px 14px}
+.look:not([data-label])::after{display:none}
+.look::after{content:attr(data-label);position:absolute;right:-14px;bottom:26px;transform:rotate(-4deg);background:var(--tape);color:var(--tape-ink);font:400 24px/1 var(--f-hand);padding:8px 14px}
 .tips{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:14px}
 .tips li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:14px}
 .tips svg{width:26px;height:26px;margin-top:3px;color:var(--gold)}
@@ -290,7 +299,7 @@ footer{background:var(--ink);padding-block:48px 40px}
       <a href="#case" id="navCase">The case</a>
       <a href="#how">How it works</a>
       <a href="#archive">Case files</a>
-      <a href="#dress">Dress code</a>
+      <a href="#dress" id="navDress">Dress code</a>
       <a href="#journal">Journal</a>
       <a href="#store">Store</a>
       <a href="#join">Join us</a>
@@ -380,22 +389,22 @@ footer{background:var(--ink);padding-block:48px 40px}
   </div>
 </section>
 
-<div class="tape-edge" role="presentation"></div>
+<div class="tape-edge" id="edgeDress" role="presentation"></div>
 
 <section class="band" id="dress">
-  <div class="in dress">
-    <div class="look"><img src="lookbook.webp" alt="A collage of guests in trendy traditional Nigerian outfits: geles, lace, agbada, aso-oke and beads, in red, black and gold" width="900" height="1125"></div>
+  <div class="in dress" id="dressGrid">
+    <div class="looks" id="dressLooks">
+      <figure class="look-fig"><div class="look" data-label="Part one"><img src="lookbook.webp" alt="A collage of guests in trendy traditional Nigerian outfits: geles, lace, agbada, aso-oke and beads, in red, black and gold" width="900" height="1125"></div>
+        <figcaption class="look-cap"><b>For her</b><button class="btn ghost small" type="button" data-post="what-to-wear-part-one">Read the style guide</button></figcaption></figure>
+    </div>
     <div>
-      <h2>What do I wear?</h2>
-      <p class="sub" style="max-width:30em">Trendy traditional Nigerian. Dress to impress. Everyone in the room is a suspect, so dress like someone with something to hide.</p>
-      <ul class="tips">
+      <h2 id="dressTitle">What do I wear?</h2>
+      <p class="sub" id="dressIntro" style="max-width:30em">Trendy traditional Nigerian. Dress to impress. Everyone in the room is a suspect, so dress like someone with something to hide.</p>
+      <ul class="tips" id="dressTips">
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 9-9 9-9-9z"/></svg><div><b>Start with the fabric</b><span>Aso-oke, lace, adire, ankara or brocade, cut sharp.</span></div></li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><b>Think night in Lagos</b><span>Black, oxblood red and gold, with one loud piece.</span></div></li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18c0-6 3-11 8-11s8 5 8 11z"/><path d="M2 18h20"/></svg><div><b>Finish like a suspect</b><span>A gele, a statement hat, beads, brass cuffs and a good bag.</span></div></li>
       </ul>
-      <div class="cta-row">
-        <button class="btn ghost" type="button" data-post="what-to-wear-part-one">Read the style guide</button>
-      </div>
     </div>
   </div>
 </section>
@@ -625,6 +634,28 @@ footer{background:var(--ink);padding-block:48px 40px}
         var img=$('#casePosterImg');img.src=poster;img.alt=featured.posterAlt||('Poster for '+featured.title);
         $('#casePoster').hidden=false;$('#caseGrid').classList.remove('nopost');
       }else{$('#casePoster').hidden=true;$('#caseGrid').classList.add('nopost')}
+    }
+
+    /* dress code: any number of looks (up to four), each can open its own style guide */
+    var D=S.dress;
+    if(D){
+      if(D.show===false){$('#dress').hidden=true;$('#edgeDress').hidden=true;$('#navDress').hidden=true}
+      else{
+        var ICONS=["<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M12 3l9 9-9 9-9-9z\"/></svg>", "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/></svg>", "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M4 18c0-6 3-11 8-11s8 5 8 11z\"/><path d=\"M2 18h20\"/></svg>", "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" aria-hidden=\"true\"><path d=\"M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z\"/></svg>"];
+        setText($('#dressTitle'),D.title||'What do I wear?');
+        var di=$('#dressIntro');di.textContent=D.intro||'';di.hidden=!D.intro;
+        var tips=(D.tips||[]).filter(function(t){return t&&(t.title||t.text)});
+        $('#dressTips').innerHTML=tips.map(function(t,i){return '<li>'+ICONS[i%ICONS.length]+'<div><b>'+esc(t.title)+'</b><span>'+esc(t.text)+'</span></div></li>'}).join('');
+        $('#dressTips').hidden=!tips.length;
+        var looks=(D.looks||[]).filter(function(l){return l&&safePath(l.image)});
+        var lh=looks.map(function(l){
+          var hasPost=l.postId&&POSTS.some(function(p){return p.id===l.postId});
+          return '<figure class="look-fig"><div class="look"'+(l.label?' data-label="'+esc(l.label)+'"':'')+'><img src="'+esc(safePath(l.image))+'" alt="'+esc(l.alt||l.caption||'Style guide')+'" loading="lazy"></div>'
+            +((l.caption||hasPost)?'<figcaption class="look-cap">'+(l.caption?'<b>'+esc(l.caption)+'</b>':'')+(hasPost?'<button class="btn ghost small" type="button" data-post="'+esc(l.postId)+'">Read the style guide</button>':'')+'</figcaption>':'')+'</figure>';
+        }).join('');
+        $('#dressLooks').innerHTML=lh;$('#dressLooks').hidden=!looks.length;
+        var dg=$('#dressGrid');dg.classList.toggle('nopost',!looks.length);dg.classList.toggle('multi',looks.length>1);
+      }
     }
 
     /* tape text */
