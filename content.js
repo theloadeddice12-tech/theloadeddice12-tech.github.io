@@ -6,7 +6,7 @@ window.SITE = {
   "links": {
     "whatsapp": "https://chat.whatsapp.com/KDs0jEbpfRT4gBWcntghli",
     "instagram": "https://www.instagram.com/the_loadeddice",
-    "email": "theloadeddice12@gmail.com"
+    "email": "roll@theloadeddice.com"
   },
   "events": [
     {
@@ -28,8 +28,8 @@ window.SITE = {
       "poster": "",
       "posterAlt": "",
       "meta": "",
-      "media": [],
-      "images": []
+      "images": [],
+      "media": []
     },
     {
       "id": "eko-after-dark",
@@ -47,18 +47,18 @@ window.SITE = {
       "priceLabel": "early bird",
       "priceNote": "Goes up to ₦10,000 for standard tickets.",
       "wear": "Trendy traditional Nigerian. Dress to impress.",
-      "poster": "poster-portrait.webp",
-      "posterAlt": "Èkó After Dark poster: a woman in a red gele looking over Lagos lagoon at dusk, with a table of dice, a mask and crime-scene photos",
+      "poster": "uploads/eko-after-dark-mvijx1jy.webp",
+      "posterAlt": "Èkó After Dark poster: with the event description and location",
       "meta": "",
-      "media": [],
-      "images": []
+      "images": [],
+      "media": []
     },
     {
       "id": "case-03",
       "status": "secret",
       "title": "Case 03",
       "tagline": "",
-      "date": "",
+      "date": "2026-11-07",
       "venue": "",
       "area": "",
       "address": "",
@@ -72,8 +72,8 @@ window.SITE = {
       "poster": "",
       "posterAlt": "",
       "meta": "Venue and date are classified",
-      "media": [],
-      "images": []
+      "images": [],
+      "media": []
     }
   ],
   "posts": [
