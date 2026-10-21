@@ -47,7 +47,7 @@ window.SITE = {
       "priceLabel": "early bird",
       "priceNote": "Goes up to ₦10,000 for standard tickets.",
       "wear": "Trendy traditional Nigerian. Dress to impress.",
-      "poster": "uploads/eko-after-dark-mvijx1jy.webp",
+      "poster": "uploads/eko-after-dark-mvik1gws.webp",
       "posterAlt": "Èkó After Dark poster: with the event description and location",
       "meta": "",
       "images": [],
