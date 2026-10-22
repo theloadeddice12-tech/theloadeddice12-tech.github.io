@@ -306,7 +306,6 @@ footer{background:var(--ink);padding-block:48px 40px}
 .ndice{display:block;width:34px;height:34px;perspective:200px;flex:none;filter:drop-shadow(0 0 6px rgba(224,53,69,.45))}
 .ndice .dice{--s:22px;margin:6px;animation:tumble 7s linear infinite}
 @keyframes tumble{from{transform:rotateX(-24deg) rotateY(0) rotateZ(0)}to{transform:rotateX(336deg) rotateY(360deg) rotateZ(0)}}
-@media (prefers-reduced-motion:reduce){.ndice .dice{animation:none;transform:rotateX(-24deg) rotateY(-32deg)}}
 
 /* ---------- entrance gate ---------- */
 .gate{display:none;position:fixed;inset:0;z-index:9999;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;overflow:hidden;touch-action:manipulation}
@@ -338,7 +337,6 @@ html.gate-on,html.gate-on body{overflow:hidden}
 .gate-tape span{display:inline-block;padding-left:0;animation:marq 26s linear infinite}
 @keyframes marq{to{transform:translateX(-50%)}}
 .gate.go .gate-top,.gate.go .gate-hint,.gate.go .gate-tape{opacity:0}
-@media (prefers-reduced-motion:reduce){.gate-bg::after,.gate-hint b,.gate-tape span{animation:none}}
 html.entered .hero .in>*{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
 html.entered .hero .in>*:nth-child(2){animation-delay:.08s}
 html.entered .hero .in>*:nth-child(3){animation-delay:.16s}
@@ -657,7 +655,7 @@ try{if(f||(!sessionStorage.getItem('tld_in')&&!location.hash))d.classList.add('g
     shadow.style.transform='scale('+(1-Math.sin(t*1.4)*.06)+')';
     raf=requestAnimationFrame(idle);
   }
-  if(!reduce)raf=requestAnimationFrame(idle);else tilt();
+  raf=requestAnimationFrame(idle);
   function ease3(u){return 1-Math.pow(1-u,3)}
   function easeIn3(u){return u*u*u}
   function arc(u){ /* three bounces, each a parabola: returns height 0..1 */
@@ -667,7 +665,6 @@ try{if(f||(!sessionStorage.getItem('tld_in')&&!location.hash))d.classList.add('g
   }
   function roll(){
     if(rolling||done)return;rolling=true;gate.classList.add('go');
-    if(reduce){bg.style.transition='opacity .6s';bg.style.opacity=0;fly.style.transition='opacity .4s';fly.style.opacity=0;setTimeout(finish,650);return}
     var sx=ax,sy=ay,tx=Math.ceil((sx+900)/360)*360,ty=Math.ceil((sy+1080)/360)*360;
     var H=Math.min(innerHeight*.34,300),D1=1500,D2=1000,start=performance.now();
     var diag=Math.hypot(innerWidth,innerHeight)*0.62+80,flashed=false;
@@ -684,6 +681,10 @@ try{if(f||(!sessionStorage.getItem('tld_in')&&!location.hash))d.classList.add('g
       }
       if(!flashed){flashed=true;ax=tx;ay=ty;tilt();flash.animate([{opacity:.95,transform:'scale(1)'},{opacity:0,transform:'scale(60)'}],{duration:900,easing:'cubic-bezier(.1,.7,.2,1)'});}
       var u2=Math.min(1,(el-D1)/D2);
+      if(reduce){ /* phones set to Reduce Motion: same roll, but no big zoom, just a soft fade */
+        fly.style.opacity=1-u2;bg.style.opacity=1-u2;shadow.style.opacity=1-u2;
+        if(u2<1){raf=requestAnimationFrame(step)}else{finish()}return;
+      }
       var sc=1+13*easeIn3(u2);
       fly.style.transform='translateY(0) scale('+sc+')';
       shadow.style.opacity=Math.max(0,1-u2*3);
