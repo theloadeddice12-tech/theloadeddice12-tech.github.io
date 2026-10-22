@@ -245,12 +245,21 @@ var DEFAULT_DRESS={show:true,title:'What do I wear?',
         {title:'Think night in Lagos',text:'Black, oxblood red and gold, with one loud piece.'},
         {title:'Finish like a suspect',text:'A gele, a statement hat, beads, brass cuffs and a good bag.'}],
   looks:[{label:'Part one',caption:'For her',image:'lookbook.webp',alt:'A collage of guests in trendy traditional Nigerian outfits: geles, lace, agbada, aso-oke and beads, in red, black and gold',postId:'what-to-wear-part-one'}]};
+var DEFAULT_STORE={show:true,title:'The evidence locker',
+  intro:"Proof you survived the night. Merch for the detectives who solved it and the ones who didn't.",
+  items:[{name:'Shirts',line:'For the whole team',image:'',alt:'',label:'Coming soon'},
+         {name:'Hoodies',line:'For the long walk home',image:'',alt:'',label:'Coming soon'},
+         {name:'Caps',line:'Keep your face hidden',image:'',alt:'',label:'Coming soon'},
+         {name:'Cups',line:'Handle with care',image:'',alt:'',label:'Coming soon'}]};
 function normalize(d){
   d=d||{};
   var dr=d.dress||DEFAULT_DRESS;
   d.dress={show:dr.show!==false,title:dr.title||'',intro:dr.intro||'',
     tips:(dr.tips||[]).map(function(t){return {title:t.title||'',text:t.text||''}}),
     looks:(dr.looks||[]).map(function(l){return {label:l.label||'',caption:l.caption||'',image:l.image||'',alt:l.alt||'',postId:l.postId||''}})};
+  var sr=d.store||DEFAULT_STORE;
+  d.store={show:sr.show!==false,title:sr.title||'',intro:sr.intro||'',
+    items:(sr.items||[]).map(function(i){return {name:i.name||'',line:i.line||'',image:i.image||'',alt:i.alt||'',label:i.label||''}})};
   d.links=Object.assign({whatsapp:'',instagram:'',email:''},d.links||{});
   d.events=(d.events||[]).map(function(e){
     e=Object.assign({id:'',status:'closed',title:'',tagline:'',date:'',venue:'',area:'',address:'',blurb:'',description:'',
@@ -283,7 +292,7 @@ function storyToBody(s){
   return String(s||'').split(/\n\s*\n/).map(function(x){return x.replace(/\s*\n\s*/g,' ').trim()}).filter(Boolean);
 }
 function serialize(d){
-  var out={version:2,links:{whatsapp:clean(d.links.whatsapp),instagram:clean(d.links.instagram),email:clean(d.links.email)},events:[],dress:null,posts:[]};
+  var out={version:2,links:{whatsapp:clean(d.links.whatsapp),instagram:clean(d.links.instagram),email:clean(d.links.email)},events:[],dress:null,store:null,posts:[]};
   var evs=d.events.slice().sort(cmpEvents);
   out.events=evs.map(function(e){
     return {
@@ -299,6 +308,8 @@ function serialize(d){
   out.dress={show:!!d.dress.show,title:clean(d.dress.title),intro:clean(d.dress.intro),
     tips:d.dress.tips.filter(function(t){return clean(t.title)||clean(t.text)}).map(function(t){return {title:clean(t.title),text:clean(t.text)}}),
     looks:d.dress.looks.filter(function(l){return clean(l.image)}).map(function(l){return {label:clean(l.label),caption:clean(l.caption),image:clean(l.image),alt:clean(l.alt),postId:clean(l.postId)}})};
+  out.store={show:!!d.store.show,title:clean(d.store.title),intro:clean(d.store.intro),
+    items:d.store.items.filter(function(i){return clean(i.name)}).map(function(i){return {name:clean(i.name),line:clean(i.line),image:clean(i.image),alt:clean(i.alt),label:clean(i.label)||'Coming soon'}})};
   var ids=postIds(d.posts);
   out.posts=d.posts.map(function(p,i){
     var body=storyToBody(p._story);
@@ -663,6 +674,45 @@ function dressPanel(){
   return box;
 }
 
+/* ------------------------------------------------------------------ store panel */
+function storePanel(){
+  var st=state.data.store,box=h('div');
+  box.appendChild(h('p',{class:'intro',text:'The store section of the homepage. For now every item says "Coming soon". Add a real photo of each product, and change the tag to something like "Sold out" or "Pre-order" when you are ready. Square pictures look best.'}));
+  var show=h('input',{type:'checkbox',checked:st.show});
+  show.addEventListener('change',function(){st.show=show.checked;touch()});
+  box.appendChild(h('label',{class:'check',style:'margin-bottom:16px'},show,h('span',{text:'Show the store on the site (untick to hide all of it)'})));
+  box.appendChild(h('div',{class:'form'},
+    textField(st,'title','Heading',{ph:'The evidence locker'}),
+    textField(st,'intro','Introduction',{area:true,rows:2})));
+  var itemsBox=h('div',{style:'margin-top:16px'});
+  function draw(){
+    itemsBox.textContent='';
+    st.items.forEach(function(it,i){
+      itemsBox.appendChild(h('div',{class:'group',style:'background:var(--ink-3);margin-bottom:14px'},
+        h('h3',{text:'Item '+(i+1)+(it.name?': '+it.name:'')}),
+        h('div',{class:'row2'},
+          textField(it,'name','Name',{ph:'Detective hoodie'}),
+          textField(it,'line','One line about it',{ph:'For the long walk home'})),
+        h('div',{class:'row2'},
+          textField(it,'label','Yellow tag',{ph:'Coming soon',hint:'For example: Coming soon, Pre-order, Sold out.'}),
+          textField(it,'alt','Describe the picture',{ph:'Black hoodie with a gold dice',hint:'For screen readers. Optional.'})),
+        fieldDiv('Product picture',imagePicker(it,'image',function(){return it.name||'product'}),'A square picture works best. Leave empty to keep the drawn icon.'),
+        h('div',{class:'actions'},
+          i>0?h('button',{type:'button',class:'btn ghost small',onclick:function(){st.items.splice(i,1);st.items.splice(i-1,0,it);touch();draw()},text:'Move up'}):null,
+          h('button',{type:'button',class:'btn danger small sp',onclick:function(){
+            if(!confirm('Remove this item from the store?'))return;
+            if(it.image&&state.pending[it.image]&&!state.pending[it.image].done)delete state.pending[it.image];
+            st.items.splice(i,1);touch();draw();
+          },text:'Remove this item'}))));
+    });
+    if(st.items.length<8)itemsBox.appendChild(h('div',null,h('button',{type:'button',class:'btn',onclick:function(){
+      st.items.push({name:'',line:'',image:'',alt:'',label:'Coming soon'});touch();draw();
+    },text:'+ Add an item'})));
+  }
+  draw();box.appendChild(itemsBox);
+  return box;
+}
+
 /* ------------------------------------------------------------------ settings panel */
 function settingsPanel(){
   var box=h('div');
@@ -715,6 +765,7 @@ function usedPaths(out){
   out.events.forEach(function(e){if(e.poster)u[e.poster]=1;(e.images||[]).forEach(function(m){if(m.src)u[m.src]=1})});
   out.posts.forEach(function(p){if(p.image)u[p.image]=1});
   out.dress.looks.forEach(function(l){if(l.image)u[l.image]=1});
+  out.store.items.forEach(function(i){if(i.image)u[i.image]=1});
   return u;
 }
 function commitMsg(what){return 'Admin: '+what+(state.name?' (by '+state.name+')':'')}
@@ -785,7 +836,7 @@ function signOut(){
 function renderPanel(){
   var y=window.scrollY,slot=$('#panel');if(!slot)return;
   slot.textContent='';
-  slot.appendChild(state.tab==='events'?eventsPanel():state.tab==='posts'?postsPanel():state.tab==='dress'?dressPanel():settingsPanel());
+  slot.appendChild(state.tab==='events'?eventsPanel():state.tab==='posts'?postsPanel():state.tab==='dress'?dressPanel():state.tab==='store'?storePanel():settingsPanel());
   document.querySelectorAll('.tab').forEach(function(t){t.setAttribute('aria-selected',t.dataset.tab===state.tab?'true':'false')});
   updateBar();window.scrollTo(0,y);
 }
@@ -799,7 +850,7 @@ function renderApp(){
     h('a',{class:'btn ghost small',href:site,target:'_blank',rel:'noopener',text:'View site'}),
     h('button',{type:'button',class:'btn',id:'saveBtn',onclick:function(){save(false)},text:'Save changes'}))));
   var tabs=h('div',{class:'tabs',role:'tablist'});
-  [['events','Events'],['posts','Journal'],['dress','Dress code'],['settings','Settings']].forEach(function(t){
+  [['events','Events'],['posts','Journal'],['dress','Dress code'],['store','Store'],['settings','Settings']].forEach(function(t){
     tabs.appendChild(h('button',{type:'button',class:'tab',role:'tab','data-tab':t[0],onclick:function(){state.tab=t[0];state.openKey=null;state.banner=null;var bs=$('#bannerSlot');if(bs)bs.textContent='';renderPanel()},text:t[1]}));
   });
   app.appendChild(h('div',{class:'wrap'},tabs,h('div',{id:'bannerSlot'}),h('div',{id:'panel'}),
