@@ -83,24 +83,35 @@ window.SITE = {
     "tips": [
       {
         "title": "Start with the fabric",
-        "text": "Aso-oke, lace, adire, ankara or brocade, cut sharp."
+        "text": "Aso-oke, lace, adire, ankara, senator or brocade, cut sharp."
       },
       {
         "title": "Think night in Lagos",
-        "text": "Black, oxblood red and gold, with one loud piece."
+        "text": "Black, oxblood red, navy, green, cream and gold, with one loud piece."
       },
       {
-        "title": "Finish like a suspect",
-        "text": "A gele, a statement hat, beads, brass cuffs and a good bag."
+        "title": "Ladies, finish like a suspect",
+        "text": "A gele, statement earrings, beads, brass cuffs and a good bag."
+      },
+      {
+        "title": "Gentlemen, finish like a suspect",
+        "text": "A sharp cap, coral beads, a good watch and sunglasses."
       }
     ],
     "looks": [
       {
-        "label": "Part one",
-        "caption": "For her",
+        "label": "Part One",
+        "caption": "For Her",
         "image": "lookbook.webp",
         "alt": "A collage of guests in trendy traditional Nigerian outfits: geles, lace, agbada, aso-oke and beads, in red, black and gold",
         "postId": "what-to-wear-part-one"
+      },
+      {
+        "label": "Part Two",
+        "caption": "For Him",
+        "image": "uploads/part-two-mvjg4682.webp",
+        "alt": "A collage of guests in trendy traditional Nigerian outfits: Men in agbada, buba, senator, fila (cap) in black and gold",
+        "postId": "what-should-i-wear-to-eko-after-dark-part-two"
       }
     ]
   },
@@ -141,18 +152,33 @@ window.SITE = {
   },
   "posts": [
     {
+      "id": "what-should-i-wear-to-eko-after-dark-part-two",
+      "title": "What should I wear to Èkó After Dark? Part two",
+      "date": "October 2026",
+      "summary": "For the gentlemen: agbada, aso-oke, senator and a sharp cap. Here is how to look like you know something.",
+      "image": "",
+      "body": [
+        "Gentlemen, the dress code is trendy traditional Nigerian. Your wardrobe already holds the answer. It just needs to look like it has somewhere to be.",
+        "Start with the agbada. Wear it in black, cream, navy or oxblood, with embroidery at the chest that catches the light when you move. If the full agbada feels like too much, a well-cut senator or a kaftan set in deep green or pale grey does the job. Aso-oke, in a bold green or teal, makes a very good loud piece.",
+        "Finish it with a cap. A fila, an abeti-aja or a structured hat tips the whole look. Add coral beads for weight, a good watch and sunglasses, because a man who hides his eyes always seems to know more than he says.",
+        "Think in the colours of a Lagos night: black, oxblood, navy, forest green and cream, with one loud piece. Let the fabric hold its shape and the tailoring do the talking.",
+        "You will be on your feet all night, so wear shoes you can stand in. A clean sandal or a good loafer will see you through.",
+        "Everyone in the room is a suspect. Dress like the one who looks the calmest."
+      ]
+    },
+    {
       "id": "what-to-wear-part-one",
       "title": "What should I wear to Èkó After Dark? Part one",
       "date": "October 2026",
-      "summary": "The dress code is trendy traditional Nigerian. Here is how to get it right.",
+      "summary": "For the ladies: lace, gele and a statement piece. Here is how to look like you have a secret.",
       "image": "",
       "body": [
-        "The dress code is trendy traditional Nigerian. That is a wide door, so here is how to walk through it.",
-        "Start with a fabric that has history: aso-oke, lace, adire, ankara or brocade. Then make it sharp. A tailored agbada with a structured hat. A corset buba with a statement sleeve. A gele tied like you have somewhere important to be.",
-        "The room is a Lagos night, so think in black, oxblood red and gold, with one loud piece. Beads, brass cuffs, big earrings and a good bag do a lot of talking.",
-        "Remember the story too. Everyone in the room is a suspect, so dress like someone with a secret and a good alibi. Stripes and sunglasses work for the calm and cool. Velvet and beads work for the dramatic.",
+        "Ladies, the dress code is trendy traditional Nigerian. That is a wide door, so here is how to walk through it.",
+        "Start with a fabric that has history: aso-oke, lace, adire, ankara or brocade. Then make it sharp. A corset buba with a statement sleeve. A structured iro and buba in lace. A tailored wrapper set with a cut that moves when you do.",
+        "Add a gele tied like you have somewhere important to be. Then add the details: beads, brass cuffs, big earrings and a good bag. They do a lot of talking.",
+        "The room is a Lagos night, so think in black, oxblood red and gold, with one loud piece. Velvet and beads work for the dramatic. Stripes, sunglasses and clean lines work for the calm and cool.",
         "You will be on your feet, so let your shoes be comfortable and stylish at the same time.",
-        "Part two is coming soon."
+        "Everyone in the room is a suspect. Dress like someone with a secret and a very good alibi."
       ]
     },
     {
