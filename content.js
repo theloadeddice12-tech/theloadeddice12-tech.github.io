@@ -76,6 +76,69 @@ window.SITE = {
       "media": []
     }
   ],
+  "dress": {
+    "show": true,
+    "title": "What do I wear?",
+    "intro": "Trendy traditional Nigerian. Dress to impress. Everyone in the room is a suspect, so dress like someone with something to hide.",
+    "tips": [
+      {
+        "title": "Start with the fabric",
+        "text": "Aso-oke, lace, adire, ankara or brocade, cut sharp."
+      },
+      {
+        "title": "Think night in Lagos",
+        "text": "Black, oxblood red and gold, with one loud piece."
+      },
+      {
+        "title": "Finish like a suspect",
+        "text": "A gele, a statement hat, beads, brass cuffs and a good bag."
+      }
+    ],
+    "looks": [
+      {
+        "label": "Part one",
+        "caption": "For her",
+        "image": "lookbook.webp",
+        "alt": "A collage of guests in trendy traditional Nigerian outfits: geles, lace, agbada, aso-oke and beads, in red, black and gold",
+        "postId": "what-to-wear-part-one"
+      }
+    ]
+  },
+  "store": {
+    "show": false,
+    "title": "The evidence locker",
+    "intro": "Proof you survived the night. Merch for the detectives who solved it and the ones who didn't.",
+    "items": [
+      {
+        "name": "Shirts",
+        "line": "For the whole team",
+        "image": "",
+        "alt": "",
+        "label": "Coming soon"
+      },
+      {
+        "name": "Hoodies",
+        "line": "For the long walk home",
+        "image": "",
+        "alt": "",
+        "label": "Coming soon"
+      },
+      {
+        "name": "Caps",
+        "line": "Keep your face hidden",
+        "image": "",
+        "alt": "",
+        "label": "Coming soon"
+      },
+      {
+        "name": "Cups",
+        "line": "Handle with care",
+        "image": "",
+        "alt": "",
+        "label": "Coming soon"
+      }
+    ]
+  },
   "posts": [
     {
       "id": "what-to-wear-part-one",
