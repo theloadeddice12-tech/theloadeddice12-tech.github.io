@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The Loaded Dice</title>
+<title>The Loaded Dice | Murder Mystery Party in Lagos</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3CradialGradient%20id=%22g%22%20cx=%22.3%22%20cy=%22.25%22%20r=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%23d23a42%22/%3E%3Cstop%20offset=%22.55%22%20stop-color=%22%238e1520%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%233a070c%22/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect%20x=%223%22%20y=%223%22%20width=%2258%22%20height=%2258%22%20rx=%2213%22%20fill=%22url%28%23g%29%22%20stroke=%22%23f2d58c%22%20stroke-width=%225%22/%3E%3Cg%20fill=%22%23f2d58c%22%3E%3Ccircle%20cx=%2219%22%20cy=%2219%22%20r=%226.5%22/%3E%3Ccircle%20cx=%2245%22%20cy=%2219%22%20r=%226.5%22/%3E%3Ccircle%20cx=%2232%22%20cy=%2232%22%20r=%226.5%22/%3E%3Ccircle%20cx=%2219%22%20cy=%2245%22%20r=%226.5%22/%3E%3Ccircle%20cx=%2245%22%20cy=%2245%22%20r=%226.5%22/%3E%3C/g%3E%3C/svg%3E">
 <meta name="theme-color" content="#0b0707">
 <link rel="canonical" href="https://theloadeddice.com/">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "The Loaded Dice", "url": "https://theloadeddice.com/", "logo": "https://theloadeddice.com/logo-gold.webp", "description": "Lagos' first roving murder mystery party.", "sameAs": ["https://www.instagram.com/the_loadeddice"], "email": "roll@theloadeddice.com"}</script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="The Loaded Dice">
 <meta property="og:title" content="The Loaded Dice | Lagos' roving murder mystery party">
@@ -23,7 +24,7 @@
 
 
 
-<meta name="description" content="Lagos' first roving murder mystery party. Your friends are suspects. Trust no one.">
+<meta name="description" content="Lagos' first roving murder mystery party. Your friends are suspects. Trust no one. A party, games and a crime scene, with a new venue and a new victim each time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Albert+Sans:wght@400;500;600;700;800&family=Special+Elite&family=Permanent+Marker&display=swap" rel="stylesheet">
@@ -950,6 +951,26 @@ var GA_ID='G-GL99QXXPNL';
       main.hidden=false;main.textContent='Join the Loaded Tribe';main.href=safeUrl(L.whatsapp)||'#join';
       main.removeAttribute('data-link');tribe.hidden=true;
     }
+
+
+    /* tell search engines about the open event (Google can show it as an event in results) */
+    (function(){
+      try{
+        if(!featured||!parts(featured.date))return;
+        var site='https://theloadeddice.com/';
+        var ev={'@context':'https://schema.org','@type':'Event','name':featured.title,'startDate':featured.date,
+          'eventStatus':'https://schema.org/EventScheduled','eventAttendanceMode':'https://schema.org/OfflineEventAttendanceMode',
+          'description':featured.description||featured.blurb||'A murder mystery party in Lagos. Your friends are suspects.',
+          'organizer':{'@type':'Organization','name':'The Loaded Dice','url':site},
+          'image':[site+(safePath(featured.poster)||'og-image.jpg'),site+'og-image.jpg']};
+        var addr={'@type':'PostalAddress','addressLocality':'Lagos','addressCountry':'NG'};
+        if(featured.address)addr.streetAddress=featured.address;
+        ev.location={'@type':'Place','name':featured.venue||'Lagos','address':addr};
+        var tu=safeUrl(featured.ticketUrl),pr=String(featured.price||'').replace(/[^0-9.]/g,'');
+        if(tu){ev.offers={'@type':'Offer','url':tu,'priceCurrency':'NGN','availability':'https://schema.org/InStock'};if(pr)ev.offers.price=pr}
+        var sc=document.createElement('script');sc.type='application/ld+json';sc.id='ldEvent';sc.textContent=JSON.stringify(ev);document.head.appendChild(sc);
+      }catch(e){}
+    })();
 
     /* the open case section */
     var caseSec=$('#case');
