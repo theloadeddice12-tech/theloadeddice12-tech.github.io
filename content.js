@@ -183,7 +183,7 @@ window.SITE = {
         "title": "Pop-up nights",
         "when": "Announced late",
         "where": "Somewhere in Lagos",
-        "text": "A mystery that turns up where you least expect it. One night, one location, and we tell the tribe at the last minute.",
+        "text": "A mystery that turns up where you least expect it. One day, one location, and we tell the tribe at the last minute.",
         "status": "soon",
         "button": "",
         "link": ""
@@ -193,7 +193,7 @@ window.SITE = {
         "title": "The Pitch Night (BYOB)",
         "when": "December 2026",
         "where": "Details soon",
-        "text": "A games night for the Loaded Tribe. Bring a murder mystery of your own, as a PDF or a slide deck, and pitch it to us. We read them all and pick the winner. You also bring your bottle and share with the tribe.",
+        "text": "A games evening for the Loaded Tribe. Bring a murder mystery of your own, as a PDF or a slide deck, and pitch it to us. We read them all and pick the winner. You also bring your bottle and share with the tribe.",
         "status": "soon",
         "button": "",
         "link": ""
@@ -203,7 +203,7 @@ window.SITE = {
   "private": {
     "show": true,
     "title": "Bring the mystery to your party",
-    "intro": "Birthdays, office team-building, private celebrations and community events. Tell us the occasion and we shape the night around your guests.",
+    "intro": "Birthdays, office team-building, private celebrations and community events. Tell us the occasion and we shape the event around your guests.",
     "types": [
       "Birthdays",
       "Corporate and team-building",
