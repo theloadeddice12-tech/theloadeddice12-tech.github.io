@@ -189,31 +189,11 @@ window.SITE = {
         "link": ""
       },
       {
-        "tag": "Games night",
-        "title": "Small games nights",
-        "when": "Small group",
-        "where": "A service apartment",
-        "text": "A table, a handful of suspects and a story that ends badly for somebody. Close, quiet and very hard to bluff in.",
-        "status": "soon",
-        "button": "",
-        "link": ""
-      },
-      {
-        "tag": "BYOB",
-        "title": "Bring your own booze",
-        "when": "Coming soon",
-        "where": "Venue shared with the tribe",
-        "text": "You bring the bottle. We bring the body. A looser, louder night where the drinks are yours and the secrets are ours.",
-        "status": "soon",
-        "button": "",
-        "link": ""
-      },
-      {
         "tag": "Pitch night",
-        "title": "The Pitch Night",
+        "title": "The Pitch Night (BYOB)",
         "when": "December 2026",
         "where": "Details soon",
-        "text": "Bring a murder mystery of your own, as a PDF or a slide deck, and pitch it to us. We read them all and pick the winner.",
+        "text": "A games night for the Loaded Tribe. Bring a murder mystery of your own, as a PDF or a slide deck, and pitch it to us. We read them all and pick the winner. You also bring your bottle and share with the tribe.",
         "status": "soon",
         "button": "",
         "link": ""
