@@ -224,7 +224,7 @@ window.SITE = {
         "text": "Tell us the occasion, the date and roughly how many guests. We shape the mystery to fit."
       }
     ],
-    "note": "Pricing is by quote, so every night is priced for what you need.",
+    "note": "Pricing is by quote, so every event is priced for what you need.",
     "button": "Request a quote",
     "message": "Hello Loaded Dice! I'd like a quote for a private event.\n\nOccasion:\nDate:\nNumber of guests:\nVenue (or I need you to suggest one):"
   },
