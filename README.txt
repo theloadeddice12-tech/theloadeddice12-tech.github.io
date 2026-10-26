@@ -11,7 +11,9 @@ Open theloadeddice.com/admin.html, sign in, change things, press "Save changes".
 It goes live a minute or two later. Everything is saved in GitHub's history, so nothing is lost.
 - Events tab: add an event, open or close it, add up to 4 pictures per event, and add photo and video links after a night.
 - Journal tab: write and reorder posts.
-- Settings tab: WhatsApp, Instagram and contact email.
+- Side quests tab: pop-ups, games nights, BYOB and the Pitch Night. Add, reorder, set Open / Coming soon / Done.
+- Private events tab: the heading, kinds of events, three boxes, the WhatsApp message people send you, and a small note where you can put pricing later.
+- Settings tab: WhatsApp, Instagram, contact email and the business WhatsApp number used by the quote button.
 
 PHOTO AND VIDEO LINKS
 Close an event, then "Add a photo or video link". Paste a Google Photos, Google Drive,

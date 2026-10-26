@@ -253,6 +253,21 @@ var DEFAULT_STORE={show:true,title:'The evidence locker',
          {name:'Hoodies',line:'For the long walk home',image:'',alt:'',label:'Coming soon'},
          {name:'Caps',line:'Keep your face hidden',image:'',alt:'',label:'Coming soon'},
          {name:'Cups',line:'Handle with care',image:'',alt:'',label:'Coming soon'}]};
+var DEFAULT_QUESTS={show:true,title:'Side quests',
+  intro:'Between the big cases, we run smaller mysteries. Pop-ups, games nights and a few surprises. Tap one to ask about it.',
+  items:[{tag:'Pop-up',title:'Pop-up nights',when:'Announced late',where:'Somewhere in Lagos',text:'A mystery that turns up where you least expect it. One night, one location, and we tell the tribe at the last minute.',status:'soon',button:'',link:''},
+         {tag:'Games night',title:'Small games nights',when:'Small group',where:'A service apartment',text:'A table, a handful of suspects and a story that ends badly for somebody. Close, quiet and very hard to bluff in.',status:'soon',button:'',link:''},
+         {tag:'BYOB',title:'Bring your own booze',when:'Coming soon',where:'Venue shared with the tribe',text:'You bring the bottle. We bring the body. A looser, louder night where the drinks are yours and the secrets are ours.',status:'soon',button:'',link:''},
+         {tag:'Pitch night',title:'The Pitch Night',when:'December 2026',where:'Details soon',text:'Bring a murder mystery of your own, as a PDF or a slide deck, and pitch it to us. We read them all and pick the winner.',status:'soon',button:'',link:''}]};
+var DEFAULT_PRIVATE={show:true,title:'Bring the mystery to your party',
+  intro:'Birthdays, office team-building, private celebrations and community events. Tell us the occasion and we shape the night around your guests.',
+  types:['Birthdays','Corporate and team-building','Private parties','Brand and community events'],
+  steps:[{title:'We come to you',text:'Your home, office or event space. We bring the story, the cast and the crime scene. You cover the props and the set-up.'},
+         {title:'Or pick a venue',text:'Choose your own venue, or leave it to us and we will suggest one that suits your group.'},
+         {title:'Built around your group',text:'Tell us the occasion, the date and roughly how many guests. We shape the mystery to fit.'}],
+  note:'Pricing is by quote, so every night is priced for what you need.',
+  button:'Request a quote',
+  message:"Hello Loaded Dice! I'd like a quote for a private event.\n\nOccasion:\nDate:\nNumber of guests:\nVenue (or I need you to suggest one):"};
 function normalize(d){
   d=d||{};
   var dr=d.dress||DEFAULT_DRESS;
@@ -262,7 +277,15 @@ function normalize(d){
   var sr=d.store||DEFAULT_STORE;
   d.store={show:sr.show!==false,title:sr.title||'',intro:sr.intro||'',
     items:(sr.items||[]).map(function(i){return {name:i.name||'',line:i.line||'',image:i.image||'',alt:i.alt||'',label:i.label||''}})};
-  d.links=Object.assign({whatsapp:'',instagram:'',email:''},d.links||{});
+  var qr=d.quests||DEFAULT_QUESTS;
+  d.quests={show:qr.show!==false,title:qr.title||'',intro:qr.intro||'',
+    items:(qr.items||[]).map(function(i){return {tag:i.tag||'',title:i.title||'',when:i.when||'',where:i.where||'',text:i.text||'',status:['open','soon','done'].indexOf(i.status)>=0?i.status:'soon',button:i.button||'',link:i.link||''}})};
+  var pr=d['private']||DEFAULT_PRIVATE;
+  d['private']={show:pr.show!==false,title:pr.title||'',intro:pr.intro||'',
+    _types:(pr.types||[]).join('\n'),
+    steps:(pr.steps||[]).map(function(x){return {title:x.title||'',text:x.text||''}}),
+    note:pr.note||'',button:pr.button||'',message:pr.message||''};
+  d.links=Object.assign({whatsapp:'',instagram:'',email:'',phone:''},d.links||{});
   d.events=(d.events||[]).map(function(e){
     e=Object.assign({id:'',status:'closed',title:'',tagline:'',date:'',venue:'',area:'',address:'',blurb:'',description:'',
       ticketUrl:'',price:'',priceLabel:'',priceNote:'',wear:'',poster:'',posterAlt:'',meta:'',media:[],images:[]},e);
@@ -294,7 +317,7 @@ function storyToBody(s){
   return String(s||'').split(/\n\s*\n/).map(function(x){return x.replace(/\s*\n\s*/g,' ').trim()}).filter(Boolean);
 }
 function serialize(d){
-  var out={version:2,links:{whatsapp:clean(d.links.whatsapp),instagram:clean(d.links.instagram),email:clean(d.links.email)},events:[],dress:null,store:null,posts:[]};
+  var out={version:2,links:{whatsapp:clean(d.links.whatsapp),instagram:clean(d.links.instagram),email:clean(d.links.email),phone:clean(d.links.phone).replace(/\D/g,'')},events:[],dress:null,store:null,quests:null,'private':null,posts:[]};
   var evs=d.events.slice().sort(cmpEvents);
   out.events=evs.map(function(e){
     return {
@@ -312,6 +335,13 @@ function serialize(d){
     looks:d.dress.looks.filter(function(l){return clean(l.image)}).map(function(l){return {label:clean(l.label),caption:clean(l.caption),image:clean(l.image),alt:clean(l.alt),postId:clean(l.postId)}})};
   out.store={show:!!d.store.show,title:clean(d.store.title),intro:clean(d.store.intro),
     items:d.store.items.filter(function(i){return clean(i.name)}).map(function(i){return {name:clean(i.name),line:clean(i.line),image:clean(i.image),alt:clean(i.alt),label:clean(i.label)||'Coming soon'}})};
+  out.quests={show:!!d.quests.show,title:clean(d.quests.title),intro:clean(d.quests.intro),
+    items:d.quests.items.filter(function(i){return clean(i.title)}).map(function(i){return {tag:clean(i.tag),title:clean(i.title),when:clean(i.when),where:clean(i.where),text:clean(i.text),status:i.status,button:clean(i.button),link:clean(i.link)}})};
+  var pv=d['private'];
+  out['private']={show:!!pv.show,title:clean(pv.title),intro:clean(pv.intro),
+    types:String(pv._types||'').split(/\n/).map(clean).filter(Boolean),
+    steps:pv.steps.filter(function(x){return clean(x.title)||clean(x.text)}).map(function(x){return {title:clean(x.title),text:clean(x.text)}}),
+    note:clean(pv.note),button:clean(pv.button),message:String(pv.message||'').replace(/\r/g,'').trim()};
   var ids=postIds(d.posts);
   out.posts=d.posts.map(function(p,i){
     var body=storyToBody(p._story);
@@ -715,6 +745,87 @@ function storePanel(){
   return box;
 }
 
+/* ------------------------------------------------------------------ side quests panel */
+function questsPanel(){
+  var q=state.data.quests,box=h('div');
+  box.appendChild(h('p',{class:'intro',text:'The Side quests section of the homepage: pop-ups, games nights, BYOB nights and the Pitch Night. Add one, change its tag from Coming soon to Open when it is on, and mark it Done afterwards. Each card has an "Ask about it" button that opens WhatsApp with a message already written.'}));
+  var show=h('input',{type:'checkbox',checked:q.show});
+  show.addEventListener('change',function(){q.show=show.checked;touch()});
+  box.appendChild(h('label',{class:'check',style:'margin-bottom:16px'},show,h('span',{text:'Show Side quests on the site (untick to hide all of it)'})));
+  box.appendChild(h('div',{class:'form'},
+    textField(q,'title','Heading',{ph:'Side quests'}),
+    textField(q,'intro','Introduction',{area:true,rows:2})));
+  var itemsBox=h('div',{style:'margin-top:16px'});
+  function draw(){
+    itemsBox.textContent='';
+    q.items.forEach(function(it,i){
+      var sel=h('select',null,h('option',{value:'open',text:'Open'}),h('option',{value:'soon',text:'Coming soon'}),h('option',{value:'done',text:'Done (hides the button)'}));
+      sel.value=it.status;sel.addEventListener('change',function(){it.status=sel.value;touch()});
+      itemsBox.appendChild(h('div',{class:'group',style:'background:var(--ink-3);margin-bottom:14px'},
+        h('h3',{text:'Side quest '+(i+1)+(it.title?': '+it.title:'')}),
+        h('div',{class:'row2'},
+          textField(it,'title','Name',{ph:'The Pitch Night'}),
+          textField(it,'tag','Small label above the name',{ph:'Pitch night',hint:'For example: Pop-up, Games night, BYOB.'})),
+        h('div',{class:'row2'},
+          textField(it,'when','When',{ph:'December 2026',hint:'Free text. A date, a month or "Announced late".'}),
+          textField(it,'where','Where',{ph:'Details soon'})),
+        textField(it,'text','What it is',{area:true,rows:3}),
+        h('div',{class:'row2'},
+          fieldDiv('Status (the red stamp)',sel),
+          textField(it,'button','Button text',{ph:'Ask about it',hint:'Optional. Leave empty for "Ask about it".'})),
+        textField(it,'link','Button link (optional)',{type:'url',mode:'url',ph:'https://…',hint:'Leave empty and the button opens WhatsApp with a message about this side quest. Paste a tickets or sign-up link when you have one.'}),
+        h('div',{class:'actions'},
+          i>0?h('button',{type:'button',class:'btn ghost small',onclick:function(){q.items.splice(i,1);q.items.splice(i-1,0,it);touch();draw()},text:'Move up'}):null,
+          h('button',{type:'button',class:'btn danger small sp',onclick:function(){
+            if(!confirm('Remove this side quest?'))return;
+            q.items.splice(i,1);touch();draw();
+          },text:'Remove this side quest'}))));
+    });
+    if(q.items.length<12)itemsBox.appendChild(h('div',null,h('button',{type:'button',class:'btn',onclick:function(){
+      q.items.push({tag:'',title:'',when:'',where:'',text:'',status:'soon',button:'',link:''});touch();draw();
+    },text:'+ Add a side quest'})));
+  }
+  draw();box.appendChild(itemsBox);
+  return box;
+}
+
+/* ------------------------------------------------------------------ private events panel */
+function privatePanel(){
+  var p=state.data['private'],box=h('div');
+  box.appendChild(h('p',{class:'intro',text:'The Private events section of the homepage, for birthdays, corporate nights and other groups who want the mystery at their own party. The big button opens WhatsApp with a quote request already written. Prices are not shown, so you can change them any time by adding a line to the note.'}));
+  var show=h('input',{type:'checkbox',checked:p.show});
+  show.addEventListener('change',function(){p.show=show.checked;touch()});
+  box.appendChild(h('label',{class:'check',style:'margin-bottom:16px'},show,h('span',{text:'Show Private events on the site (untick to hide all of it)'})));
+  box.appendChild(h('div',{class:'form'},
+    textField(p,'title','Heading',{ph:'Bring the mystery to your party'}),
+    textField(p,'intro','Introduction',{area:true,rows:3}),
+    textField(p,'_types','Kinds of events (one per line)',{area:true,rows:5,hint:'Shown as yellow tags. For example: Birthdays, Corporate and team-building.'}),
+    textField(p,'button','Button text',{ph:'Request a quote'}),
+    textField(p,'message','WhatsApp message people send you',{area:true,rows:6,hint:'This is typed into WhatsApp for them. They only have to fill in the blanks and press send.'}),
+    textField(p,'note','Small note under the button',{area:true,rows:2,hint:'Good place for pricing: "Packages start from ₦…" once you and Precious decide.'})));
+  var stepsBox=h('div',{style:'margin-top:16px'});
+  function draw(){
+    stepsBox.textContent='';
+    p.steps.forEach(function(x,i){
+      stepsBox.appendChild(h('div',{class:'group',style:'background:var(--ink-3);margin-bottom:14px'},
+        h('h3',{text:'Box '+(i+1)+(x.title?': '+x.title:'')}),
+        textField(x,'title','Title',{ph:'We come to you'}),
+        textField(x,'text','Text',{area:true,rows:3}),
+        h('div',{class:'actions'},
+          i>0?h('button',{type:'button',class:'btn ghost small',onclick:function(){p.steps.splice(i,1);p.steps.splice(i-1,0,x);touch();draw()},text:'Move up'}):null,
+          h('button',{type:'button',class:'btn danger small sp',onclick:function(){
+            if(!confirm('Remove this box?'))return;
+            p.steps.splice(i,1);touch();draw();
+          },text:'Remove this box'}))));
+    });
+    if(p.steps.length<6)stepsBox.appendChild(h('div',null,h('button',{type:'button',class:'btn',onclick:function(){
+      p.steps.push({title:'',text:''});touch();draw();
+    },text:'+ Add a box'})));
+  }
+  draw();box.appendChild(stepsBox);
+  return box;
+}
+
 /* ------------------------------------------------------------------ settings panel */
 function settingsPanel(){
   var box=h('div');
@@ -722,6 +833,7 @@ function settingsPanel(){
   box.appendChild(h('div',{class:'form'},
     textField(state.data.links,'whatsapp','WhatsApp community link',{type:'url',mode:'url',ph:'https://chat.whatsapp.com/…'}),
     textField(state.data.links,'instagram','Instagram link',{type:'url',mode:'url',ph:'https://www.instagram.com/the_loadeddice'}),
+    textField(state.data.links,'phone','Business WhatsApp number',{type:'tel',mode:'tel',ph:'2349033830549',hint:'With the country code and no plus or spaces. The quote and side quest buttons message this number. Leave empty to use 2349033830549.'}),
     textField(state.data.links,'email','Contact email',{type:'email',mode:'email',ph:'hello@theloadeddice.com',hint:'Shown on the Join us section and used by the email buttons.'})));
   box.appendChild(h('div',{class:'card'},
     h('h3',{text:'This device'}),
@@ -757,6 +869,11 @@ function validate(){
   ['whatsapp','instagram'].forEach(function(k){
     var v=clean(d.links[k]);if(v&&!validUrl(v))errors.push('The '+k+' link must start with https://');
   });
+  d.quests.items.forEach(function(i){
+    if(!clean(i.title)&&(clean(i.text)||clean(i.tag)))errors.push('A side quest needs a name.');
+    if(clean(i.link)&&!validUrl(clean(i.link)))errors.push((clean(i.title)||'A side quest')+': the button link must start with https://');
+  });
+  if(clean(d.links.phone)&&clean(d.links.phone).replace(/\D/g,'').length<10)errors.push('The business WhatsApp number looks too short. Use the country code, for example 2349033830549.');
   if(clean(d.links.email)&&!/^\S+@\S+\.\S+$/.test(clean(d.links.email)))errors.push('The contact email does not look right.');
   return {errors:Array.from(new Set(errors)),warnings:warnings};
 }
@@ -838,7 +955,7 @@ function signOut(){
 function renderPanel(){
   var y=window.scrollY,slot=$('#panel');if(!slot)return;
   slot.textContent='';
-  slot.appendChild(state.tab==='events'?eventsPanel():state.tab==='posts'?postsPanel():state.tab==='dress'?dressPanel():state.tab==='store'?storePanel():settingsPanel());
+  slot.appendChild(state.tab==='events'?eventsPanel():state.tab==='posts'?postsPanel():state.tab==='dress'?dressPanel():state.tab==='store'?storePanel():state.tab==='quests'?questsPanel():state.tab==='private'?privatePanel():settingsPanel());
   document.querySelectorAll('.tab').forEach(function(t){t.setAttribute('aria-selected',t.dataset.tab===state.tab?'true':'false')});
   updateBar();window.scrollTo(0,y);
 }
@@ -852,7 +969,7 @@ function renderApp(){
     h('a',{class:'btn ghost small',href:site,target:'_blank',rel:'noopener',text:'View site'}),
     h('button',{type:'button',class:'btn',id:'saveBtn',onclick:function(){save(false)},text:'Save changes'}))));
   var tabs=h('div',{class:'tabs',role:'tablist'});
-  [['events','Events'],['posts','Journal'],['dress','Dress code'],['store','Store'],['settings','Settings']].forEach(function(t){
+  [['events','Events'],['posts','Journal'],['dress','Dress code'],['quests','Side quests'],['private','Private events'],['store','Store'],['settings','Settings']].forEach(function(t){
     tabs.appendChild(h('button',{type:'button',class:'tab',role:'tab','data-tab':t[0],onclick:function(){state.tab=t[0];state.openKey=null;state.banner=null;var bs=$('#bannerSlot');if(bs)bs.textContent='';renderPanel()},text:t[1]}));
   });
   app.appendChild(h('div',{class:'wrap'},tabs,h('div',{id:'bannerSlot'}),h('div',{id:'panel'}),

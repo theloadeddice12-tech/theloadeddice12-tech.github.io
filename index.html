@@ -86,7 +86,7 @@ p{margin:0}
 .menu-btn i{display:block;position:relative;width:20px;height:12px;border-block:2px solid currentColor}
 .menu-btn i::after{content:"";position:absolute;left:0;right:0;top:3px;height:2px;background:currentColor}
 .links{display:none;position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(100% + 1px);width:min(380px,calc(100vw - 32px));flex-direction:column;align-items:stretch;gap:0;
-  background:rgba(14,8,9,.98);border:1px solid var(--gold);border-top:0;padding:8px 22px 20px;box-shadow:0 30px 60px rgba(0,0,0,.65);counter-reset:m}
+  background:rgba(14,8,9,.98);border:1px solid var(--gold);border-top:0;padding:8px 22px 20px;box-shadow:0 30px 60px rgba(0,0,0,.65);counter-reset:m;max-height:calc(100vh - 90px);max-height:calc(100dvh - 90px);overflow-y:auto}
 .links.open{display:flex;animation:menuIn .28s cubic-bezier(.2,.7,.2,1)}
 @keyframes menuIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
 .links a:not(.btn){counter-increment:m;display:flex;align-items:baseline;gap:14px;padding:14px 2px;text-decoration:none;border-bottom:1px solid rgba(214,171,82,.15);
@@ -382,6 +382,28 @@ html.gate-on .dock{display:none}
 .dk svg{width:20px;height:20px;flex:none}
 .dk[aria-pressed="true"]{background:var(--blood);border-color:var(--blood-hi);color:#fff}
 @media (max-width:560px){.dk span{display:none}.dk{padding:0 12px}.dock{left:auto;right:max(12px,env(safe-area-inset-right,0px))}}
+/* side quests + private events */
+.quests{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.quest{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;padding:28px 26px 26px;background:var(--ink-3);border:1px solid var(--line);border-left:4px solid var(--blood)}
+.quest:nth-child(even){border-left-color:var(--gold)}
+.quest .tag{font:400 14px/1.2 var(--f-type);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.quest h3{font:400 30px/1.1 var(--f-display);padding-right:96px}
+.quest .qmeta{color:var(--gold-hi);font-size:15px;font-weight:700}
+.quest p{color:var(--muted)}
+.quest .stamp{position:absolute;top:16px;right:16px;padding:3px 10px;border:2px solid var(--blood-hi);color:var(--blood-hi);font:400 13px/1.2 var(--f-type);letter-spacing:.08em;text-transform:uppercase;transform:rotate(3deg)}
+.quest .btn{margin-top:10px}
+.ptypes{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 30px}
+.ptypes span{padding:7px 14px;background:var(--tape);color:var(--tape-ink);font:800 13px/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase}
+.psteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.pstep{padding:22px 20px 24px;background:var(--ink-3);border-top:4px solid var(--blood)}
+.pstep:nth-child(even){border-top-color:var(--gold)}
+.pstep .n{display:block;font:400 54px/1 var(--f-display);color:var(--tape);margin-bottom:12px}
+.pstep h3{font:700 20px/1.2 var(--f-body);margin-bottom:8px}
+.pstep p{font-size:16px;color:var(--muted)}
+.pquote{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:34px}
+.pnote{color:var(--muted);margin-top:14px;max-width:38em}
+@media(max-width:900px){.psteps{grid-template-columns:1fr}.quests{grid-template-columns:1fr}}
+@media(max-width:480px){.quest h3{padding-right:0;margin-top:26px}}
 .rv{opacity:0;translate:0 34px;transition:opacity .9s cubic-bezier(.2,.7,.2,1),translate .9s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
 .rv.on{opacity:1;translate:0 0}
 html.rv-on .string path{stroke-dasharray:1;stroke-dashoffset:1}
@@ -424,6 +446,7 @@ var GA_ID='G-GL99QXXPNL';
     var a=e.target.closest&&e.target.closest('a[href]');if(!a)return;
     var h=a.getAttribute('href')||'',host=a.hostname||'';
     if(/clooza\.com$/.test(host))track('ticket_click',{link_url:h});
+    else if(/(^|\.)wa\.me$/.test(host))track(a.getAttribute('data-ev')||'whatsapp_click',{link_url:h.slice(0,80)});
     else if(/chat\.whatsapp\.com$/.test(host))track('whatsapp_click');
     else if(/instagram\.com$/.test(host))track('instagram_click');
     else if(/^mailto:/i.test(h))track('email_click');
@@ -458,6 +481,8 @@ var GA_ID='G-GL99QXXPNL';
       <a href="#how">How it works</a>
       <a href="#archive">Case files</a>
       <a href="#dress" id="navDress">Dress code</a>
+      <a href="#quests" id="navQuests">Side quests</a>
+      <a href="#private" id="navPrivate">Private events</a>
       <a href="#journal">Journal</a>
       <a href="#store" id="navStore">Store</a>
       <a href="#join">Join us</a>
@@ -569,6 +594,35 @@ var GA_ID='G-GL99QXXPNL';
 
 <div class="divider" role="presentation"></div>
 
+<section class="band" id="quests">
+  <div class="in">
+    <div class="head">
+      <h2 id="questsTitle">Side quests</h2>
+      <p class="sub" id="questsIntro">Between the big cases, we run smaller mysteries. Pop-ups, games nights and a few surprises. Tap one to ask about it.</p>
+    </div>
+    <div class="quests" id="questGrid"><article class="quest"><span class="stamp">Coming soon</span><span class="tag">Pop-up</span><h3>Pop-up nights</h3><p class="qmeta">Announced late · Somewhere in Lagos</p><p>A mystery that turns up where you least expect it. One night, one location, and we tell the tribe at the last minute.</p><a class="btn small ghost" data-ev="quest_click" href="https://wa.me/2349033830549?text=Hello%20Loaded%20Dice%21%20I%27m%20interested%20in%20the%20side%20quest%3A%20Pop-up%20nights." target="_blank" rel="noopener">Ask about it</a></article><article class="quest"><span class="stamp">Coming soon</span><span class="tag">Games night</span><h3>Small games nights</h3><p class="qmeta">Small group · A service apartment</p><p>A table, a handful of suspects and a story that ends badly for somebody. Close, quiet and very hard to bluff in.</p><a class="btn small ghost" data-ev="quest_click" href="https://wa.me/2349033830549?text=Hello%20Loaded%20Dice%21%20I%27m%20interested%20in%20the%20side%20quest%3A%20Small%20games%20nights." target="_blank" rel="noopener">Ask about it</a></article><article class="quest"><span class="stamp">Coming soon</span><span class="tag">BYOB</span><h3>Bring your own booze</h3><p class="qmeta">Coming soon · Venue shared with the tribe</p><p>You bring the bottle. We bring the body. A looser, louder night where the drinks are yours and the secrets are ours.</p><a class="btn small ghost" data-ev="quest_click" href="https://wa.me/2349033830549?text=Hello%20Loaded%20Dice%21%20I%27m%20interested%20in%20the%20side%20quest%3A%20Bring%20your%20own%20booze." target="_blank" rel="noopener">Ask about it</a></article><article class="quest"><span class="stamp">Coming soon</span><span class="tag">Pitch night</span><h3>The Pitch Night</h3><p class="qmeta">December 2026 · Details soon</p><p>Bring a murder mystery of your own, as a PDF or a slide deck, and pitch it to us. We read them all and pick the winner.</p><a class="btn small ghost" data-ev="quest_click" href="https://wa.me/2349033830549?text=Hello%20Loaded%20Dice%21%20I%27m%20interested%20in%20the%20side%20quest%3A%20The%20Pitch%20Night." target="_blank" rel="noopener">Ask about it</a></article></div>
+  </div>
+</section>
+
+<div class="divider" id="divQuests" role="presentation"></div>
+
+<section class="band" id="private">
+  <div class="in">
+    <div class="head">
+      <h2 id="privTitle">Bring the mystery to your party</h2>
+      <p class="sub" id="privIntro">Birthdays, office team-building, private celebrations and community events. Tell us the occasion and we shape the night around your guests.</p>
+    </div>
+    <div class="ptypes" id="privTypes"><span>Birthdays</span><span>Corporate and team-building</span><span>Private parties</span><span>Brand and community events</span></div><ol class="psteps" id="privSteps"><li class="pstep"><span class="n">1</span><h3>We come to you</h3><p>Your home, office or event space. We bring the story, the cast and the crime scene. You cover the props and the set-up.</p></li><li class="pstep"><span class="n">2</span><h3>Or pick a venue</h3><p>Choose your own venue, or leave it to us and we will suggest one that suits your group.</p></li><li class="pstep"><span class="n">3</span><h3>Built around your group</h3><p>Tell us the occasion, the date and roughly how many guests. We shape the mystery to fit.</p></li></ol>
+    <div class="pquote">
+      <a class="btn" id="privBtn" data-ev="quote_click" href="https://wa.me/2349033830549?text=Hello%20Loaded%20Dice%21%20I%27d%20like%20a%20quote%20for%20a%20private%20event.%0A%0AOccasion%3A%0ADate%3A%0ANumber%20of%20guests%3A%0AVenue%20%28or%20I%20need%20you%20to%20suggest%20one%29%3A" target="_blank" rel="noopener">Request a quote</a>
+      <a class="btn ghost" id="privMail" data-ev="email_click" href="mailto:theloadeddice12@gmail.com?subject=Private%20event%20quote">Email us instead</a>
+    </div>
+    <p class="pnote" id="privNote">Pricing is by quote, so every night is priced for what you need.</p>
+  </div>
+</section>
+
+<div class="divider" id="divPrivate" role="presentation"></div>
+
 <section class="band" id="journal">
   <div class="in">
     <div class="head">
@@ -668,6 +722,8 @@ var GA_ID='G-GL99QXXPNL';
           <li id="footCase"><a href="#case">The case</a></li>
           <li><a href="#how">How it works</a></li>
           <li><a href="#archive">Case files</a></li>
+          <li><a href="#quests">Side quests</a></li>
+          <li><a href="#private">Private events</a></li>
           <li><a href="#journal">Journal</a></li>
           <li><a href="#store">Store</a></li>
         </ul>
@@ -797,7 +853,7 @@ var GA_ID='G-GL99QXXPNL';
   }
 
   /* evidence appears as you scroll */
-  var RV_SEL='.band .in > *,.band .head,.steps li,.file,.look-fig,.tips li,.post,.bag,#dressTitle,#dressIntro';
+  var RV_SEL='.band .in > *,.band .head,.steps li,.file,.look-fig,.tips li,.post,.bag,.quest,.pstep,.ptypes,.pquote,#dressTitle,#dressIntro';
   var io=null,pend=[],strOn=false;
   function watch(el){io.observe(el)}
   TLD.reveal=function(){
@@ -1056,6 +1112,50 @@ var GA_ID='G-GL99QXXPNL';
         var pic=img?'<img class="shot" src="'+esc(img)+'" alt="'+esc(it.alt||it.name)+'" loading="lazy" decoding="async">':(icons[i%icons.length]||'');
         return '<div class="bag"><span class="label">Evidence</span>'+pic+'<h3>'+esc(it.name)+'</h3>'+(it.line?'<p>'+esc(it.line)+'</p>':'')+'<span class="soon">'+esc(it.label||'Coming soon')+'</span></div>';
       }).join('');
+    })();
+
+    /* side quests and private events: wording from content.js, with the same defaults as the static page */
+    (function(){
+      var phone=String(L.phone||'2349033830549').replace(/\D/g,'')||'2349033830549';
+      function wa(msg){return 'https://wa.me/'+phone+'?text='+encodeURIComponent(msg)}
+      var STAT={open:'Open',soon:'Coming soon',done:'Done'};
+      var Q=S.quests;
+      if(Q){
+        if(Q.show===false){var q1=$('#quests');if(q1)q1.hidden=true;var d1=$('#divQuests');if(d1)d1.hidden=true;var n1=$('#navQuests');if(n1)n1.hidden=true;
+          $$('#links a[href="#quests"],footer a[href="#quests"]').forEach(function(a){a.hidden=true;if(a.parentNode.tagName==='LI')a.parentNode.hidden=true})}
+        else{
+          if(Q.title)setText($('#questsTitle'),Q.title);
+          if(Q.intro)setText($('#questsIntro'),Q.intro);
+          var items=(Q.items||[]).filter(function(i){return i&&i.title});
+          $('#questGrid').innerHTML=items.map(function(it){
+            var st=STAT[it.status]?it.status:'soon';
+            var link=safeUrl(it.link)||wa("Hello Loaded Dice! I'm interested in the side quest: "+it.title+".");
+            var meta=[it.when,it.where].filter(Boolean).join(' \u00b7 ');
+            return '<article class="quest"><span class="stamp">'+esc(STAT[st])+'</span>'+(it.tag?'<span class="tag">'+esc(it.tag)+'</span>':'')+
+              '<h3>'+esc(it.title)+'</h3>'+(meta?'<p class="qmeta">'+esc(meta)+'</p>':'')+(it.text?'<p>'+esc(it.text)+'</p>':'')+
+              (st==='done'?'':'<a class="btn small ghost" data-ev="quest_click" href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(it.button||'Ask about it')+'</a>')+'</article>';
+          }).join('');
+        }
+      }
+      var P=S['private'];
+      if(P){
+        if(P.show===false){var p1=$('#private');if(p1)p1.hidden=true;var d2=$('#divPrivate');if(d2)d2.hidden=true;
+          $$('#links a[href="#private"],footer a[href="#private"]').forEach(function(a){a.hidden=true;if(a.parentNode.tagName==='LI')a.parentNode.hidden=true})}
+        else{
+          if(P.title)setText($('#privTitle'),P.title);
+          if(P.intro)setText($('#privIntro'),P.intro);
+          if(P.types&&P.types.length)$('#privTypes').innerHTML=P.types.filter(Boolean).map(function(t){return '<span>'+esc(t)+'</span>'}).join('');
+          var steps=(P.steps||[]).filter(function(x){return x&&(x.title||x.text)});
+          if(steps.length)$('#privSteps').innerHTML=steps.map(function(x,i){return '<li class="pstep"><span class="n">'+(i+1)+'</span><h3>'+esc(x.title||'')+'</h3><p>'+esc(x.text||'')+'</p></li>'}).join('');
+          if(P.note!=null)setText($('#privNote'),P.note);
+          var pb=$('#privBtn');
+          if(P.button)setText(pb,P.button);
+          pb.href=wa(P.message||"Hello Loaded Dice! I'd like a quote for a private event.");
+        }
+      }
+      /* the quote button uses the business number even when no settings are saved yet */
+      var pb2=$('#privBtn');if(pb2&&!(P&&P.message))pb2.href=wa("Hello Loaded Dice! I'd like a quote for a private event.\n\nOccasion:\nDate:\nNumber of guests:\nVenue (or I need you to suggest one):");
+      var pm=$('#privMail');if(pm)pm.href='mailto:'+email+'?subject='+encodeURIComponent('Private event quote');
     })();
 
     var mb=$('#menuBtn'),lk=$('#links');
