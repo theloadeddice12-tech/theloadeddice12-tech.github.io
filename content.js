@@ -180,7 +180,7 @@ window.SITE = {
     "items": [
       {
         "tag": "Pop-up",
-        "title": "Pop-up events",
+        "title": "Pop-Up Events",
         "when": "Announced late",
         "where": "Somewhere in Lagos",
         "text": "A mystery that turns up where you least expect it. One day, one location, and we tell the tribe at the last minute.",
