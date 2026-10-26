@@ -6,7 +6,8 @@ window.SITE = {
   "links": {
     "whatsapp": "https://chat.whatsapp.com/KDs0jEbpfRT4gBWcntghli",
     "instagram": "https://www.instagram.com/the_loadeddice",
-    "email": "roll@theloadeddice.com"
+    "email": "roll@theloadeddice.com",
+    "phone": ""
   },
   "events": [
     {
@@ -28,8 +29,30 @@ window.SITE = {
       "poster": "",
       "posterAlt": "",
       "meta": "",
-      "images": [],
-      "media": []
+      "images": [
+        {
+          "src": "uploads/the-dinner-party-mvoxa68i.webp",
+          "alt": "Welcome To The Mystery"
+        },
+        {
+          "src": "uploads/the-dinner-party-mvoxaxi7.webp",
+          "alt": "The Body"
+        },
+        {
+          "src": "uploads/the-dinner-party-mvoxbntr.webp",
+          "alt": "The Fan Club"
+        },
+        {
+          "src": "uploads/the-dinner-party-mvoxc26n.webp",
+          "alt": "The Walk-in"
+        }
+      ],
+      "media": [
+        {
+          "label": "Get your photos",
+          "url": "https://drive.google.com/drive/folders/162xKYbHUe24Z3hT27cW_UKsXxvOhHBee?usp=drive_link"
+        }
+      ]
     },
     {
       "id": "eko-after-dark",
@@ -149,6 +172,81 @@ window.SITE = {
         "label": "Coming soon"
       }
     ]
+  },
+  "quests": {
+    "show": true,
+    "title": "Side quests",
+    "intro": "Between the big cases, we run smaller mysteries. Pop-ups, games nights and a few surprises. Tap one to ask about it.",
+    "items": [
+      {
+        "tag": "Pop-up",
+        "title": "Pop-up nights",
+        "when": "Announced late",
+        "where": "Somewhere in Lagos",
+        "text": "A mystery that turns up where you least expect it. One night, one location, and we tell the tribe at the last minute.",
+        "status": "soon",
+        "button": "",
+        "link": ""
+      },
+      {
+        "tag": "Games night",
+        "title": "Small games nights",
+        "when": "Small group",
+        "where": "A service apartment",
+        "text": "A table, a handful of suspects and a story that ends badly for somebody. Close, quiet and very hard to bluff in.",
+        "status": "soon",
+        "button": "",
+        "link": ""
+      },
+      {
+        "tag": "BYOB",
+        "title": "Bring your own booze",
+        "when": "Coming soon",
+        "where": "Venue shared with the tribe",
+        "text": "You bring the bottle. We bring the body. A looser, louder night where the drinks are yours and the secrets are ours.",
+        "status": "soon",
+        "button": "",
+        "link": ""
+      },
+      {
+        "tag": "Pitch night",
+        "title": "The Pitch Night",
+        "when": "December 2026",
+        "where": "Details soon",
+        "text": "Bring a murder mystery of your own, as a PDF or a slide deck, and pitch it to us. We read them all and pick the winner.",
+        "status": "soon",
+        "button": "",
+        "link": ""
+      }
+    ]
+  },
+  "private": {
+    "show": true,
+    "title": "Bring the mystery to your party",
+    "intro": "Birthdays, office team-building, private celebrations and community events. Tell us the occasion and we shape the night around your guests.",
+    "types": [
+      "Birthdays",
+      "Corporate and team-building",
+      "Private parties",
+      "Brand and community events"
+    ],
+    "steps": [
+      {
+        "title": "We come to you",
+        "text": "Your home, office or event space. We bring the story, the cast and the crime scene. You cover the props and the set-up."
+      },
+      {
+        "title": "Or pick a venue",
+        "text": "Choose your own venue, or leave it to us and we will suggest one that suits your group."
+      },
+      {
+        "title": "Built around your group",
+        "text": "Tell us the occasion, the date and roughly how many guests. We shape the mystery to fit."
+      }
+    ],
+    "note": "Pricing is by quote, so every night is priced for what you need.",
+    "button": "Request a quote",
+    "message": "Hello Loaded Dice! I'd like a quote for a private event.\n\nOccasion:\nDate:\nNumber of guests:\nVenue (or I need you to suggest one):"
   },
   "posts": [
     {
