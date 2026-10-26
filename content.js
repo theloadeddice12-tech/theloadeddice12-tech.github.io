@@ -73,7 +73,12 @@ window.SITE = {
       "poster": "uploads/eko-after-dark-mvik1gws.webp",
       "posterAlt": "Èkó After Dark poster: with the event description and location",
       "meta": "",
-      "images": [],
+      "images": [
+        {
+          "src": "uploads/eko-after-dark-mvoxdiru.webp",
+          "alt": "Our Spotify DJ"
+        }
+      ],
       "media": []
     },
     {
