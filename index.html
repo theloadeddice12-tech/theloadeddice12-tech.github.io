@@ -906,9 +906,19 @@ var GA_ID='G-GL99QXXPNL';
     for(var i=0;i<3;i++){var a=seg[i];if(u<=a[1]){var k=(u-a[0])/(a[1]-a[0]);return 4*k*(1-k)*a[2]}}
     return 0;
   }
+  /* the dice lands on a different face each time: [number, final rotateX, final rotateY] */
+  var FACES=[[1,0,0],[2,-90,0],[3,0,-90],[4,0,90],[5,90,0],[6,0,180]];
+  function pickFace(){
+    var last=0;try{last=+localStorage.getItem('tld_face')||0}catch(e){}
+    var pool=FACES.filter(function(f){return f[0]!==last});
+    var f=pool[Math.min(pool.length-1,Math.floor(Math.random()*pool.length))];
+    try{localStorage.setItem('tld_face',String(f[0]))}catch(e){}
+    return f;
+  }
   function roll(){
     if(rolling||done)return;rolling=true;gate.classList.add('go');SND.roll();
-    var sx=ax,sy=ay,tx=Math.ceil((sx+900)/360)*360,ty=Math.ceil((sy+1080)/360)*360;
+    var f=pickFace();
+    var sx=ax,sy=ay,tx=Math.ceil((sx+900)/360)*360+f[1],ty=Math.ceil((sy+1080)/360)*360+f[2];
     var H=Math.min(innerHeight*.34,300),D1=1500,D2=1000,start=performance.now();
     var diag=Math.hypot(innerWidth,innerHeight)*0.62+80,flashed=false;
     var fy0=parseFloat((fly.style.transform.match(/-?[\d.]+/)||[0])[0])||0;
