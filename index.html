@@ -404,6 +404,25 @@ html.gate-on .dock{display:none}
 .pnote{color:var(--muted);margin-top:14px;max-width:38em}
 @media(max-width:900px){.psteps{grid-template-columns:1fr}.quests{grid-template-columns:1fr}}
 @media(max-width:480px){.quest h3{padding-right:0;margin-top:26px}}
+/* pitch night riddles */
+.pcard{position:relative;max-width:46em;padding:28px 26px;background:var(--ink-3);border:1px solid var(--line);border-top:4px solid var(--blood)}
+.pcard .stamp{position:absolute;top:16px;right:16px;padding:3px 10px;border:2px solid var(--blood-hi);color:var(--blood-hi);font:400 13px/1.2 var(--f-type);letter-spacing:.08em;text-transform:uppercase;transform:rotate(3deg)}
+.pcard p{color:var(--muted)}
+.pdots{display:flex;gap:8px;margin-bottom:18px}
+.pdots i{display:block;width:28px;height:6px;background:var(--line)}
+.pdots i.on{background:var(--gold)}
+.pdots i.cur{background:var(--blood-hi)}
+.ptag{font:400 14px/1.2 var(--f-type);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.pq{font:400 clamp(24px,3.6vw,34px)/1.2 var(--f-display);margin:10px 0 20px;padding-right:90px}
+.pform{display:flex;flex-wrap:wrap;gap:12px}
+.pans{flex:1 1 240px;min-width:0;min-height:48px;padding:10px 14px;background:var(--ink-2);border:2px solid var(--gold);color:var(--fg);font:500 17px/1.2 var(--f-body)}
+.pans:focus-visible{outline:3px solid var(--gold-hi);outline-offset:2px}
+.pmsg{min-height:1.6em;margin-top:14px;color:var(--gold-hi);font-weight:700}
+.pmsg.bad{color:var(--blood-hi)}
+.pcard.shake{animation:pshake .4s}
+@keyframes pshake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@media(prefers-reduced-motion:reduce){.pcard.shake{animation:none}}
+@media(max-width:480px){.pq{padding-right:0;margin-top:34px}}
 .rv{opacity:0;translate:0 34px;transition:opacity .9s cubic-bezier(.2,.7,.2,1),translate .9s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
 .rv.on{opacity:1;translate:0 0}
 html.rv-on .string path{stroke-dasharray:1;stroke-dashoffset:1}
@@ -605,6 +624,18 @@ var GA_ID='G-GL99QXXPNL';
 </section>
 
 <div class="divider" id="divQuests" role="presentation"></div>
+
+<section class="band" id="pitch" hidden>
+  <div class="in">
+    <div class="head">
+      <h2 id="pitchTitle">The Pitch Night</h2>
+      <p class="sub" id="pitchIntro">Solve the case to earn your seat.</p>
+    </div>
+    <div id="pitchBox"></div>
+  </div>
+</section>
+
+<div class="divider" id="divPitch" role="presentation" hidden></div>
 
 <section class="band" id="private">
   <div class="in">
@@ -853,7 +884,7 @@ var GA_ID='G-GL99QXXPNL';
   }
 
   /* evidence appears as you scroll */
-  var RV_SEL='.band .in > *,.band .head,.steps li,.file,.look-fig,.tips li,.post,.bag,.quest,.pstep,.ptypes,.pquote,#dressTitle,#dressIntro';
+  var RV_SEL='.band .in > *,.band .head,.steps li,.file,.look-fig,.tips li,.post,.bag,.quest,.pcard,.pstep,.ptypes,.pquote,#dressTitle,#dressIntro';
   var io=null,pend=[],strOn=false;
   function watch(el){io.observe(el)}
   TLD.reveal=function(){
@@ -1124,6 +1155,67 @@ var GA_ID='G-GL99QXXPNL';
       }).join('');
     })();
 
+    /* the pitch night riddles: open, coming soon or closed from the admin page. Answers are only stored as scrambled hashes. */
+    (function(){
+      var PT=S.pitch,sec=$('#pitch'),dv=$('#divPitch');
+      if(!PT||!sec||(PT.state!=='open'&&PT.state!=='soon'))return;
+      var phone=String(L.phone||'2349033830549').replace(/\D/g,'')||'2349033830549';
+      function wa(m){return 'https://wa.me/'+phone+'?text='+encodeURIComponent(m)}
+      var qs=(PT.questions||[]).filter(function(q){return q&&q.text&&q.salt&&q.answers&&q.answers.length});
+      var box=$('#pitchBox');
+      sec.hidden=false;if(dv)dv.hidden=false;
+      if(PT.title)setText($('#pitchTitle'),PT.title);
+      if(PT.intro)setText($('#pitchIntro'),PT.intro);
+      var canHash=!!(window.crypto&&window.crypto.subtle&&window.TextEncoder);
+      if(PT.state==='soon'||!qs.length||!canHash){
+        box.innerHTML='<div class="pcard"><span class="stamp">Coming soon</span><p>'+esc(PT.soon||'The riddles open soon. Join the tribe to hear first.')+'</p><div class="pquote"><a class="btn ghost" href="'+esc(safeUrl(L.whatsapp)||'#join')+'" target="_blank" rel="noopener">Join the Loaded Tribe</a></div></div>';
+        return;
+      }
+      function norm(s){
+        s=String(s).toLowerCase();
+        try{s=s.normalize('NFD').replace(/[̀-ͯ]/g,'')}catch(e){}
+        s=s.replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim().replace(/^(the|a|an) /,'');
+        return s.replace(/ /g,'');
+      }
+      function sha(t){
+        return crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)).then(function(b){
+          return Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('');
+        });
+      }
+      var idx=0,given=[];
+      function showQ(note){
+        var q=qs[idx];
+        var dots=qs.map(function(_,i){return '<i class="'+(i<idx?'on':i===idx?'cur':'')+'"></i>'}).join('');
+        box.innerHTML='<div class="pcard" id="pcard"><div class="pdots" aria-hidden="true">'+dots+'</div><span class="ptag">'+esc(q.kind||'Riddle')+' '+(idx+1)+' of '+qs.length+'</span>'+
+          '<h3 class="pq">'+esc(q.text)+'</h3><form class="pform" id="pform" autocomplete="off"><input class="pans" id="pans" type="text" aria-label="Your answer" placeholder="Your answer" autocapitalize="off" spellcheck="false"><button class="btn" type="submit">Check</button></form>'+
+          '<p class="pmsg" id="pmsg" role="status" aria-live="polite">'+esc(note||'')+'</p></div>';
+        var form=$('#pform'),inp=$('#pans'),msg=$('#pmsg'),card=$('#pcard');
+        form.addEventListener('submit',function(e){
+          e.preventDefault();var v=inp.value;
+          if(!norm(v)){msg.className='pmsg bad';msg.textContent='Type your answer first.';return}
+          sha(q.salt+'|'+norm(v)).then(function(h){
+            if(q.answers.indexOf(h)>=0){given.push(v.trim());idx++;if(idx>=qs.length)won();else showQ('Correct. Next one.');if(idx<qs.length){var n=$('#pans');if(n)n.focus({preventScroll:true})}}
+            else{msg.className='pmsg bad';msg.textContent='Not quite. Think again.';card.classList.remove('shake');void card.offsetWidth;card.classList.add('shake');inp.select()}
+          });
+        });
+      }
+      function won(){
+        box.innerHTML='<div class="pcard"><span class="stamp">Solved</span><h3 class="pq">'+esc(PT.successTitle||'You solved the case.')+'</h3><p>'+esc(PT.successText||'Now send us a WhatsApp message with your name.')+'</p>'+
+          '<form class="pform" id="wform" style="margin-top:18px" autocomplete="off"><input class="pans" id="wname" type="text" aria-label="Your name" placeholder="Your name" autocomplete="name"></form>'+
+          '<div class="pquote" style="margin-top:18px"><a class="btn" id="wsend" href="#" target="_blank" rel="noopener">Send my answers on WhatsApp</a></div><p class="pmsg" id="wmsg" role="status" aria-live="polite"></p></div>';
+        var a=$('#wsend'),nm=$('#wname'),wm=$('#wmsg');
+        $('#wform').addEventListener('submit',function(e){e.preventDefault()});
+        function build(){
+          var lines=['Hello Loaded Dice! I solved the Pitch Night riddles.','','Name: '+nm.value.trim(),'','My answers:'].concat(given.map(function(g,i){return (i+1)+') '+g})).concat(['','My murder mystery pitch in one line: ']);
+          a.href=wa(lines.join('\n'));
+          if(nm.value.trim()){a.setAttribute('data-ev','pitch_solved');wm.textContent=''}else a.removeAttribute('data-ev');
+        }
+        nm.addEventListener('input',build);build();
+        a.addEventListener('click',function(e){if(!nm.value.trim()){e.preventDefault();wm.className='pmsg bad';wm.textContent='Add your name first.';nm.focus()}});
+      }
+      showQ();
+    })();
+
     /* side quests and private events: wording from content.js, with the same defaults as the static page */
     (function(){
       var phone=String(L.phone||'2349033830549').replace(/\D/g,'')||'2349033830549';
@@ -1139,11 +1231,14 @@ var GA_ID='G-GL99QXXPNL';
           var items=(Q.items||[]).filter(function(i){return i&&i.title});
           $('#questGrid').innerHTML=items.map(function(it){
             var st=STAT[it.status]?it.status:'soon';
-            var link=safeUrl(it.link)||wa("Hello Loaded Dice! I'm interested in the side quest: "+it.title+".");
+            var rawL=String(it.link||'').trim(),inPage='';
+            if(/^#[A-Za-z][\w-]*$/.test(rawL)){var tg=document.getElementById(rawL.slice(1));if(tg&&!tg.hidden)inPage=rawL}
+            var link=inPage||safeUrl(rawL)||wa("Hello Loaded Dice! I'm interested in the side quest: "+it.title+".");
+            var btnTxt=(/^#/.test(rawL)&&!inPage)?'Ask about it':(it.button||'Ask about it');
             var meta=[it.when,it.where].filter(Boolean).join(' \u00b7 ');
             return '<article class="quest"><span class="stamp">'+esc(STAT[st])+'</span>'+(it.tag?'<span class="tag">'+esc(it.tag)+'</span>':'')+
               '<h3>'+esc(it.title)+'</h3>'+(meta?'<p class="qmeta">'+esc(meta)+'</p>':'')+(it.text?'<p>'+esc(it.text)+'</p>':'')+
-              (st==='done'?'':'<a class="btn small ghost" data-ev="quest_click" href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(it.button||'Ask about it')+'</a>')+'</article>';
+              (st==='done'?'':'<a class="btn small ghost" data-ev="quest_click" href="'+esc(link)+'"'+(inPage?'':' target="_blank" rel="noopener"')+'>'+esc(btnTxt)+'</a>')+'</article>';
           }).join('');
         }
       }

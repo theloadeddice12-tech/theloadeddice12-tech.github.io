@@ -253,6 +253,7 @@ var DEFAULT_STORE={show:true,title:'The evidence locker',
          {name:'Hoodies',line:'For the long walk home',image:'',alt:'',label:'Coming soon'},
          {name:'Caps',line:'Keep your face hidden',image:'',alt:'',label:'Coming soon'},
          {name:'Cups',line:'Handle with care',image:'',alt:'',label:'Coming soon'}]};
+var DEFAULT_PITCH={"state": "closed", "title": "The Pitch Night", "intro": "Solve the case to earn your seat. Get every answer right, then message us. We pick who comes.", "soon": "The riddles open soon. Join the tribe to hear first.", "successTitle": "You solved the case.", "successText": "Now send us a WhatsApp message with your name, and add a 30-second voice note about the murder mystery you would pitch. We will message the people we pick.", "questions": [{"kind": "Tribe question", "text": "Who killed Chief Emmanuel Okafor at The Dinner Party?", "salt": "dp1a9c3e", "answers": ["1181f9547b42572f5af98e65eb7b96b10c9dc070483075a2d6ef50161de42625", "4d7c5e34e714286df916c85c956a2391eb68148ebe925b4e7562188b18885d70", "a5f83346e4589bf80e86c6633772da99156aa632226b2f3e6c9f57db477a5a32"]}, {"kind": "Riddle", "text": "I'm at every murder, never a suspect, and always the first one taken out. Who am I?", "salt": "r1b72f40", "answers": ["1d79e6c59283898031ef845aaf848e94d0521a5b7eb65725e806b78093c0cc56", "3a0ec013197dff596ab8a65eb722ebad06ce30fc48784232ff128eed77b87191", "7797cedc29742fea5d7c03fdfeccdfec57245c96aca65167d9cd658e9205a25f", "7ef6ddd58e816dbbd0c65507c051564f2f02885856075f7cfbf644ae40fb6ff0", "b6f7a2cb76e8510c4f12b8615ec159af05d9efda8ec89deb557207b42daefe8f"]}, {"kind": "Riddle", "text": "The more of me you share, the less of me there is, yet at The Loaded Dice I'm why everyone is a suspect. What am I?", "salt": "r2d51a8e", "answers": ["8cad79cea7933977fb324c54d8de39fb2d6ef04dc9619e01218bf9b41bfedf11", "c7beb68f5ac59e4386328dea7d038bbe057368dc459338def09c62493d0b24f0"]}]};
 var DEFAULT_QUESTS={show:true,title:'Side quests',
   intro:'Between the big cases, we run smaller mysteries. Pop-ups, games nights and a few surprises. Tap one to ask about it.',
   items:[{tag:'Pop-up',title:'Pop-up nights',when:'Announced late',where:'Somewhere in Lagos',text:'A mystery that turns up where you least expect it. One night, one location, and we tell the tribe at the last minute.',status:'soon',button:'',link:''},
@@ -285,6 +286,9 @@ function normalize(d){
     _types:(pr.types||[]).join('\n'),
     steps:(pr.steps||[]).map(function(x){return {title:x.title||'',text:x.text||''}}),
     note:pr.note||'',button:pr.button||'',message:pr.message||''};
+  var pt=d.pitch||DEFAULT_PITCH;
+  d.pitch={state:['open','soon','closed'].indexOf(pt.state)>=0?pt.state:'closed',title:pt.title||'',intro:pt.intro||'',soon:pt.soon||'',successTitle:pt.successTitle||'',successText:pt.successText||'',
+    questions:(pt.questions||[]).map(function(q){return {kind:q.kind||'',text:q.text||'',salt:q.salt||'',answers:(q.answers||[]).slice(),_typed:''}})};
   d.links=Object.assign({whatsapp:'',instagram:'',email:'',phone:''},d.links||{});
   d.events=(d.events||[]).map(function(e){
     e=Object.assign({id:'',status:'closed',title:'',tagline:'',date:'',venue:'',area:'',address:'',blurb:'',description:'',
@@ -317,7 +321,7 @@ function storyToBody(s){
   return String(s||'').split(/\n\s*\n/).map(function(x){return x.replace(/\s*\n\s*/g,' ').trim()}).filter(Boolean);
 }
 function serialize(d){
-  var out={version:2,links:{whatsapp:clean(d.links.whatsapp),instagram:clean(d.links.instagram),email:clean(d.links.email),phone:clean(d.links.phone).replace(/\D/g,'')},events:[],dress:null,store:null,quests:null,'private':null,posts:[]};
+  var out={version:2,links:{whatsapp:clean(d.links.whatsapp),instagram:clean(d.links.instagram),email:clean(d.links.email),phone:clean(d.links.phone).replace(/\D/g,'')},events:[],dress:null,store:null,quests:null,'private':null,pitch:null,posts:[]};
   var evs=d.events.slice().sort(cmpEvents);
   out.events=evs.map(function(e){
     return {
@@ -342,6 +346,9 @@ function serialize(d){
     types:String(pv._types||'').split(/\n/).map(clean).filter(Boolean),
     steps:pv.steps.filter(function(x){return clean(x.title)||clean(x.text)}).map(function(x){return {title:clean(x.title),text:clean(x.text)}}),
     note:clean(pv.note),button:clean(pv.button),message:String(pv.message||'').replace(/\r/g,'').trim()};
+  var pi=d.pitch;
+  out.pitch={state:pi.state,title:clean(pi.title),intro:clean(pi.intro),soon:clean(pi.soon),successTitle:clean(pi.successTitle),successText:clean(pi.successText),
+    questions:pi.questions.filter(function(q){return clean(q.text)}).map(function(q){return {kind:clean(q.kind),text:clean(q.text),salt:q.salt,answers:q.answers.slice()}})};
   var ids=postIds(d.posts);
   out.posts=d.posts.map(function(p,i){
     var body=storyToBody(p._story);
@@ -364,7 +371,7 @@ function pendingCount(){
 }
 function isDirty(){
   if(!state.data)return false;
-  return JSON.stringify(serialize(state.data))!==state.orig||pendingCount()>0;
+  return JSON.stringify(serialize(state.data))!==state.orig||pendingCount()>0||state.data.pitch.questions.some(function(q){return clean(q._typed)});
 }
 function touch(){updateBar()}
 function updateBar(){
@@ -745,10 +752,73 @@ function storePanel(){
   return box;
 }
 
+/* ------------------------------------------------------------------ pitch night answers: scrambled before they are saved */
+function pitchNorm(s){
+  s=String(s).toLowerCase();
+  try{s=s.normalize('NFD').replace(/[\u0300-\u036f]/g,'')}catch(e){}
+  s=s.replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim().replace(/^(the|a|an) /,'');
+  return s.replace(/ /g,'');
+}
+function sha256hex(t){
+  return crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)).then(function(b){
+    return Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('');
+  });
+}
+function hashPitch(){
+  var chain=Promise.resolve();
+  state.data.pitch.questions.forEach(function(q){
+    var lines=String(q._typed||'').split(/\n/).map(pitchNorm).filter(Boolean);
+    if(!lines.length)return;
+    if(!q.salt)q.salt=Math.random().toString(16).slice(2,10)+Math.random().toString(16).slice(2,6);
+    chain=chain.then(function(){return Promise.all(Array.from(new Set(lines)).map(function(a){return sha256hex(q.salt+'|'+a)}))}).then(function(hs){q.answers=hs;q._typed=''});
+  });
+  return chain;
+}
+
+/* ------------------------------------------------------------------ pitch night panel */
+function pitchPanel(){
+  var p=state.data.pitch,box=h('div');
+  box.appendChild(h('p',{class:'intro',text:'The riddle page for the Pitch Night. Set it to Open when you are ready for people to try it, and back to Closed when seats are filled. When it is Closed nobody sees it. Answers are scrambled when you save, so nobody can read them in the site files, and you cannot read them back either. To change an answer, type the new answers again. Capital letters, spaces, punctuation and "the" or "a" at the start are ignored when people answer.'}));
+  var sel=h('select',null,h('option',{value:'closed',text:'Closed (hidden from the site)'}),h('option',{value:'soon',text:'Coming soon (visible, riddles locked)'}),h('option',{value:'open',text:'Open (people can solve the riddles)'}));
+  sel.value=p.state;sel.addEventListener('change',function(){p.state=sel.value;touch()});
+  box.appendChild(h('div',{class:'form'},
+    fieldDiv('Status',sel,'To send people here from the Side quests card, type #pitch as that card\'s button link. It only works while this page is Open or Coming soon.'),
+    textField(p,'title','Heading',{ph:'The Pitch Night'}),
+    textField(p,'intro','Introduction',{area:true,rows:2}),
+    textField(p,'soon','Message while Coming soon',{area:true,rows:2}),
+    textField(p,'successTitle','Message when someone gets everything right',{ph:'You solved the case.'}),
+    textField(p,'successText','What they should do next',{area:true,rows:3,hint:'Their name and answers go into a WhatsApp message to you, so you can check them.'})));
+  var qBox=h('div',{style:'margin-top:16px'});
+  function draw(){
+    qBox.textContent='';
+    p.questions.forEach(function(q,i){
+      var saved=q.answers.length;
+      qBox.appendChild(h('div',{class:'group',style:'background:var(--ink-3);margin-bottom:14px'},
+        h('h3',{text:'Question '+(i+1)}),
+        textField(q,'kind','Small label',{ph:'Riddle',hint:'For example: Riddle, Tribe question.'}),
+        textField(q,'text','The question',{area:true,rows:3}),
+        textField(q,'_typed','Accepted answers (one per line)',{area:true,rows:4,
+          ph:saved?'Saved and hidden ('+saved+' accepted). Type here only to replace them.':'Type every answer you will accept, one per line',
+          hint:'Add every spelling and short form you would accept, for example: Tunde Fashola, Tunde, Fashola.'}),
+        h('div',{class:'actions'},
+          i>0?h('button',{type:'button',class:'btn ghost small',onclick:function(){p.questions.splice(i,1);p.questions.splice(i-1,0,q);touch();draw()},text:'Move up'}):null,
+          h('button',{type:'button',class:'btn danger small sp',onclick:function(){
+            if(!confirm('Remove this question?'))return;
+            p.questions.splice(i,1);touch();draw();
+          },text:'Remove this question'}))));
+    });
+    if(p.questions.length<10)qBox.appendChild(h('div',null,h('button',{type:'button',class:'btn',onclick:function(){
+      p.questions.push({kind:'Riddle',text:'',salt:'',answers:[],_typed:''});touch();draw();
+    },text:'+ Add a question'})));
+  }
+  draw();box.appendChild(qBox);
+  return box;
+}
+
 /* ------------------------------------------------------------------ side quests panel */
 function questsPanel(){
   var q=state.data.quests,box=h('div');
-  box.appendChild(h('p',{class:'intro',text:'The Side quests section of the homepage: pop-ups, games nights, BYOB nights and the Pitch Night. Add one, change its tag from Coming soon to Open when it is on, and mark it Done afterwards. Each card has an "Ask about it" button that opens WhatsApp with a message already written.'}));
+  box.appendChild(h('p',{class:'intro',text:'The Side quests section of the homepage: pop-ups, games nights, BYOB nights and the Pitch Night. Add one, change its tag from Coming soon to Open when it is on, and mark it Done afterwards. Each card has a button that opens WhatsApp with a message already written. For the Pitch Night, type #pitch as the button link and the button will jump to the riddles once you set the Pitch Night tab to Open.'}));
   var show=h('input',{type:'checkbox',checked:q.show});
   show.addEventListener('change',function(){q.show=show.checked;touch()});
   box.appendChild(h('label',{class:'check',style:'margin-bottom:16px'},show,h('span',{text:'Show Side quests on the site (untick to hide all of it)'})));
@@ -871,8 +941,14 @@ function validate(){
   });
   d.quests.items.forEach(function(i){
     if(!clean(i.title)&&(clean(i.text)||clean(i.tag)))errors.push('A side quest needs a name.');
-    if(clean(i.link)&&!validUrl(clean(i.link)))errors.push((clean(i.title)||'A side quest')+': the button link must start with https://');
+    if(clean(i.link)&&!validUrl(clean(i.link))&&!/^#[A-Za-z][\w-]*$/.test(clean(i.link)))errors.push((clean(i.title)||'A side quest')+': the button link must start with https:// (or be #pitch).');
   });
+  var pi=d.pitch,okQ=0;
+  pi.questions.forEach(function(q,i){
+    if(!clean(q.text)){if(clean(q._typed)||q.answers.length)errors.push('Pitch Night question '+(i+1)+' has answers but no question.');return}
+    if(!q.answers.length&&!clean(q._typed).replace(/\s/g,''))errors.push('Pitch Night question '+(i+1)+' needs at least one accepted answer.');else okQ++;
+  });
+  if(pi.state==='open'&&!okQ)errors.push('The Pitch Night is set to Open but has no questions.');
   if(clean(d.links.phone)&&clean(d.links.phone).replace(/\D/g,'').length<10)errors.push('The business WhatsApp number looks too short. Use the country code, for example 2349033830549.');
   if(clean(d.links.email)&&!/^\S+@\S+\.\S+$/.test(clean(d.links.email)))errors.push('The contact email does not look right.');
   return {errors:Array.from(new Set(errors)),warnings:warnings};
@@ -895,7 +971,7 @@ function save(overwrite){
   setBanner(null);
   state.saving=true;updateBar();
   var out,text,newSha;
-  return Promise.resolve().then(function(){
+  return hashPitch().then(function(){
     finalize(state.data);out=serialize(state.data);
     var used=usedPaths(out),chain=Promise.resolve();
     Object.keys(state.pending).forEach(function(path){
@@ -955,7 +1031,7 @@ function signOut(){
 function renderPanel(){
   var y=window.scrollY,slot=$('#panel');if(!slot)return;
   slot.textContent='';
-  slot.appendChild(state.tab==='events'?eventsPanel():state.tab==='posts'?postsPanel():state.tab==='dress'?dressPanel():state.tab==='store'?storePanel():state.tab==='quests'?questsPanel():state.tab==='private'?privatePanel():settingsPanel());
+  slot.appendChild(state.tab==='events'?eventsPanel():state.tab==='posts'?postsPanel():state.tab==='dress'?dressPanel():state.tab==='store'?storePanel():state.tab==='quests'?questsPanel():state.tab==='pitch'?pitchPanel():state.tab==='private'?privatePanel():settingsPanel());
   document.querySelectorAll('.tab').forEach(function(t){t.setAttribute('aria-selected',t.dataset.tab===state.tab?'true':'false')});
   updateBar();window.scrollTo(0,y);
 }
@@ -969,7 +1045,7 @@ function renderApp(){
     h('a',{class:'btn ghost small',href:site,target:'_blank',rel:'noopener',text:'View site'}),
     h('button',{type:'button',class:'btn',id:'saveBtn',onclick:function(){save(false)},text:'Save changes'}))));
   var tabs=h('div',{class:'tabs',role:'tablist'});
-  [['events','Events'],['posts','Journal'],['dress','Dress code'],['quests','Side quests'],['private','Private events'],['store','Store'],['settings','Settings']].forEach(function(t){
+  [['events','Events'],['posts','Journal'],['dress','Dress code'],['quests','Side quests'],['pitch','Pitch Night'],['private','Private events'],['store','Store'],['settings','Settings']].forEach(function(t){
     tabs.appendChild(h('button',{type:'button',class:'tab',role:'tab','data-tab':t[0],onclick:function(){state.tab=t[0];state.openKey=null;state.banner=null;var bs=$('#bannerSlot');if(bs)bs.textContent='';renderPanel()},text:t[1]}));
   });
   app.appendChild(h('div',{class:'wrap'},tabs,h('div',{id:'bannerSlot'}),h('div',{id:'panel'}),
