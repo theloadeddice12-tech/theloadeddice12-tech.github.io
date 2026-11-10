@@ -56,7 +56,7 @@ window.SITE = {
     },
     {
       "id": "eko-after-dark",
-      "status": "open",
+      "status": "closed",
       "title": "Èkó After Dark",
       "tagline": "An Ìsàlẹ̀ Èkó Special",
       "date": "2026-11-07",
@@ -100,7 +100,7 @@ window.SITE = {
     }
   ],
   "dress": {
-    "show": true,
+    "show": false,
     "title": "What do I wear?",
     "intro": "Trendy traditional Nigerian. Dress to impress. Everyone in the room is a suspect, so dress like someone with something to hide.",
     "tips": [
