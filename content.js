@@ -191,7 +191,7 @@ window.SITE = {
       {
         "tag": "Pitch night",
         "title": "The Pitch Night (BYOB)",
-        "when": "December 2026",
+        "when": "January 2027",
         "where": "Details soon",
         "text": "A games evening for the Loaded Tribe. Bring a murder mystery of your own, as a PDF or a slide deck, and pitch it to us. We read them all and pick the winner. You also bring your bottle and share with the tribe.",
         "status": "soon",
