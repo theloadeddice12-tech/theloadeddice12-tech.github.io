@@ -409,6 +409,8 @@ html.gate-on .dock{display:none}
 .pcard{position:relative;max-width:46em;padding:28px 26px;background:var(--ink-3);border:1px solid var(--line);border-top:4px solid var(--blood)}
 .pcard .stamp{position:absolute;top:16px;right:16px;padding:3px 10px;border:2px solid var(--blood-hi);color:var(--blood-hi);font:400 13px/1.2 var(--f-type);letter-spacing:.08em;text-transform:uppercase;transform:rotate(3deg)}
 .pcard p{color:var(--muted)}
+.ptime{display:flex;align-items:center;gap:14px;margin-bottom:18px}.ptime b{font:400 30px/1 var(--f-type);color:var(--gold-hi);min-width:3.4ch;letter-spacing:.04em}.ptime span{flex:1;height:8px;background:var(--line)}.ptime i{display:block;height:100%;width:100%;background:var(--gold);transition:width .25s linear}.ptime.low b{color:var(--blood-hi)}.ptime.low i{background:var(--blood-hi)}.ptook{font:400 15px/1.2 var(--f-type);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.popts{display:grid;gap:10px}.popt{text-align:left;min-height:48px;padding:12px 16px;background:var(--ink-2);border:2px solid var(--line);color:var(--fg);font:500 17px/1.3 var(--f-body);cursor:pointer}.popt:hover,.popt:focus-visible{border-color:var(--gold);outline:none}.popt.bad{border-color:var(--blood-hi)}textarea.plong{flex:1 1 100%;min-height:110px;resize:vertical}
 .pdots{display:flex;gap:8px;margin-bottom:18px}
 .pdots i{display:block;width:28px;height:6px;background:var(--line)}
 .pdots i.on{background:var(--gold)}
@@ -1180,7 +1182,7 @@ ml('account','2753067');
       if(!PT||!sec||(PT.state!=='open'&&PT.state!=='soon'))return;
       var phone=String(L.phone||'2349033830549').replace(/\D/g,'')||'2349033830549';
       function wa(m){return 'https://wa.me/'+phone+'?text='+encodeURIComponent(m)}
-      var qs=(PT.questions||[]).filter(function(q){return q&&q.text&&q.salt&&q.answers&&q.answers.length});
+      var qs=(PT.questions||[]).filter(function(q){return q&&q.text&&(q.type==='long'||(q.salt&&q.answers&&q.answers.length&&(q.type!=='choice'||(q.options&&q.options.length>1))))});
       var box=$('#pitchBox');
       sec.hidden=false;if(dv)dv.hidden=false;
       if(PT.title)setText($('#pitchTitle'),PT.title);
@@ -1201,38 +1203,119 @@ ml('account','2753067');
           return Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('');
         });
       }
-      var idx=0,given=[];
+      var idx=0,given=[],st=null,tick=null;
+      var LIM=Math.round((parseFloat(PT.minutes)||0)*60),ONE=!!PT.oneTry,USE=LIM>0||ONE;
+      var KEY='tld_pitch_'+String(PT.round||'1');
+      function load(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}}
+      function save(){if(!USE||!st)return;try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+      function clock(s){s=Math.max(0,Math.ceil(s));var m=Math.floor(s/60),r=s%60;return m+':'+(r<10?'0':'')+r}
+      function stopTick(){if(tick){clearInterval(tick);tick=null}}
+      function left(){return LIM-(Date.now()-st.start)/1000}
+      function paint(){
+        var l=left(),c=$('#pclock'),b=$('#pbar'),t=$('#ptime');
+        if(c)c.textContent=clock(l);
+        if(b)b.style.width=(Math.max(0,Math.min(1,l/LIM))*100)+'%';
+        if(t){if(l<=20)t.classList.add('low');else t.classList.remove('low')}
+      }
+      function startTick(){
+        stopTick();
+        function step(){
+          if(left()<=0){stopTick();st.done='late';save();late();return}
+          paint();
+        }
+        step();if(st&&st.done!=='late')tick=setInterval(step,250);
+      }
+      function late(){
+        stopTick();
+        box.innerHTML='<div class="pcard"><span class="stamp">Time’s up</span><h3 class="pq">The clock ran out.</h3><p>'+(ONE?'You had one try on this phone, and it is used. If we pick you, we will message you.':'The questions locked before you finished. Take a breath and try again.')+'</p>'+(ONE?'':'<div class="pquote" style="margin-top:18px"><button class="btn" type="button" id="pretry">Try again</button></div>')+'</div>';
+        var r=$('#pretry');
+        if(r)r.addEventListener('click',function(){st=null;try{localStorage.removeItem(KEY)}catch(e){}idx=0;given=[];intro()});
+      }
+      function intro(){
+        if(!LIM){begin();return}
+        var mins=(LIM%60===0)?((LIM/60)+(LIM===60?' minute':' minutes')):clock(LIM);
+        box.innerHTML='<div class="pcard"><span class="stamp">Timed</span><h3 class="pq">Beat the clock.</h3><p>You have '+mins+' to answer '+qs.length+' question'+(qs.length===1?'':'s')+'. The clock starts when you press Start and it does not stop, even if you leave the page. '+(ONE?'You get one try on this phone. ':'')+'If time runs out, the questions lock.</p><div class="pquote" style="margin-top:18px"><button class="btn" type="button" id="pstart">Start the clock</button></div></div>';
+        $('#pstart').addEventListener('click',begin);
+      }
+      function begin(){
+        idx=0;given=[];st={start:Date.now(),idx:0,given:[],done:null};save();
+        showQ();if(LIM)startTick();
+      }
+      function advance(v,note){
+        given.push(String(v).trim());idx++;
+        if(st){st.idx=idx;st.given=given.slice();save()}
+        if(idx>=qs.length)won();else{showQ(note);var n=$('#pans');if(n)n.focus({preventScroll:true})}
+      }
+      function expired(){if(LIM&&st&&left()<=0){st.done='late';save();late();return true}return false}
       function showQ(note){
-        var q=qs[idx];
+        var q=qs[idx],ty=q.type||'short';
         var dots=qs.map(function(_,i){return '<i class="'+(i<idx?'on':i===idx?'cur':'')+'"></i>'}).join('');
-        box.innerHTML='<div class="pcard" id="pcard"><div class="pdots" aria-hidden="true">'+dots+'</div><span class="ptag">'+esc(q.kind||'Riddle')+' '+(idx+1)+' of '+qs.length+'</span>'+
-          '<h3 class="pq">'+esc(q.text)+'</h3><form class="pform" id="pform" autocomplete="off"><input class="pans" id="pans" type="text" aria-label="Your answer" placeholder="Your answer" autocapitalize="off" spellcheck="false"><button class="btn" type="submit">Check</button></form>'+
+        var ctl;
+        if(ty==='choice')ctl='<div class="popts" id="popts">'+q.options.map(function(o,i){return '<button type="button" class="popt" data-i="'+i+'">'+esc(o)+'</button>'}).join('')+'</div>';
+        else if(ty==='long')ctl='<form class="pform" id="pform" autocomplete="off"><textarea class="pans plong" id="pans" rows="4" maxlength="600" aria-label="Your answer" placeholder="Write your answer"></textarea><button class="btn" type="submit">Next</button></form>';
+        else ctl='<form class="pform" id="pform" autocomplete="off"><input class="pans" id="pans" type="text" aria-label="Your answer" placeholder="Your answer" autocapitalize="off" spellcheck="false"><button class="btn" type="submit">Check</button></form>';
+        box.innerHTML='<div class="pcard" id="pcard">'+(LIM?'<div class="ptime" id="ptime"><b id="pclock" aria-hidden="true"></b><span><i id="pbar"></i></span></div>':'')+'<div class="pdots" aria-hidden="true">'+dots+'</div><span class="ptag">'+esc(q.kind||'Riddle')+' '+(idx+1)+' of '+qs.length+'</span>'+
+          '<h3 class="pq">'+esc(q.text)+'</h3>'+ctl+
           '<p class="pmsg" id="pmsg" role="status" aria-live="polite">'+esc(note||'')+'</p></div>';
-        var form=$('#pform'),inp=$('#pans'),msg=$('#pmsg'),card=$('#pcard');
-        form.addEventListener('submit',function(e){
+        if(LIM&&st)paint();
+        var inp=$('#pans'),msg=$('#pmsg'),card=$('#pcard');
+        function wrong(){msg.className='pmsg bad';msg.textContent='Not quite. Think again.';card.classList.remove('shake');void card.offsetWidth;card.classList.add('shake')}
+        if(ty==='choice'){
+          $$('#popts .popt').forEach(function(btn){
+            btn.addEventListener('click',function(){
+              if(expired())return;
+              var o=q.options[+btn.getAttribute('data-i')];
+              sha(q.salt+'|'+norm(o)).then(function(h){
+                if(expired())return;
+                if(q.answers.indexOf(h)>=0)advance(o,'Correct. Next one.');
+                else{btn.classList.add('bad');wrong()}
+              });
+            });
+          });
+          return;
+        }
+        $('#pform').addEventListener('submit',function(e){
           e.preventDefault();var v=inp.value;
+          if(expired())return;
+          if(ty==='long'){
+            if(v.trim().length<3){msg.className='pmsg bad';msg.textContent='Write a little more first.';return}
+            advance(v,'Noted. Next one.');return;
+          }
           if(!norm(v)){msg.className='pmsg bad';msg.textContent='Type your answer first.';return}
           sha(q.salt+'|'+norm(v)).then(function(h){
-            if(q.answers.indexOf(h)>=0){given.push(v.trim());idx++;if(idx>=qs.length)won();else showQ('Correct. Next one.');if(idx<qs.length){var n=$('#pans');if(n)n.focus({preventScroll:true})}}
-            else{msg.className='pmsg bad';msg.textContent='Not quite. Think again.';card.classList.remove('shake');void card.offsetWidth;card.classList.add('shake');inp.select()}
+            if(expired())return;
+            if(q.answers.indexOf(h)>=0)advance(v,'Correct. Next one.');
+            else{wrong();inp.select()}
           });
         });
       }
       function won(){
-        box.innerHTML='<div class="pcard"><span class="stamp">Solved</span><h3 class="pq">'+esc(PT.successTitle||'You solved the case.')+'</h3><p>'+esc(PT.successText||'Now send us a WhatsApp message with your name.')+'</p>'+
+        stopTick();
+        if(st&&!st.done){st.done='won';if(LIM)st.took=Math.round((Date.now()-st.start)/1000);save()}
+        var took=(st&&LIM&&st.took!=null)?st.took:null;
+        box.innerHTML='<div class="pcard"><span class="stamp">Solved</span><h3 class="pq">'+esc(PT.successTitle||'You solved the case.')+'</h3>'+(took!=null?'<p class="ptook">Your time: '+clock(took)+'</p>':'')+'<p>'+esc(PT.successText||'Now send us a WhatsApp message with your name.')+'</p>'+
           '<form class="pform" id="wform" style="margin-top:18px" autocomplete="off"><input class="pans" id="wname" type="text" aria-label="Your name" placeholder="Your name" autocomplete="name"></form>'+
           '<div class="pquote" style="margin-top:18px"><a class="btn" id="wsend" href="#" target="_blank" rel="noopener">Send my answers on WhatsApp</a></div><p class="pmsg" id="wmsg" role="status" aria-live="polite"></p></div>';
         var a=$('#wsend'),nm=$('#wname'),wm=$('#wmsg');
         $('#wform').addEventListener('submit',function(e){e.preventDefault()});
         function build(){
-          var lines=['Hello Loaded Dice! I solved the Pitch Night riddles.','','Name: '+nm.value.trim(),'','My answers:'].concat(given.map(function(g,i){return (i+1)+') '+g})).concat(['','My murder mystery pitch in one line: ']);
+          var lines=['Hello Loaded Dice! I solved the Pitch Night riddles.','','Name: '+nm.value.trim()].concat(took!=null?['Time: '+clock(took)]:[]).concat(['','My answers:']).concat(given.map(function(g,i){return (i+1)+') '+g})).concat(['','My idea in one line: ']);
           a.href=wa(lines.join('\n'));
           if(nm.value.trim()){a.setAttribute('data-ev','pitch_solved');wm.textContent=''}else a.removeAttribute('data-ev');
         }
         nm.addEventListener('input',build);build();
         a.addEventListener('click',function(e){if(!nm.value.trim()){e.preventDefault();wm.className='pmsg bad';wm.textContent='Add your name first.';nm.focus()}});
       }
-      showQ();
+      st=USE?load():null;
+      if(st&&st.done==='won'){given=st.given||[];won();return}
+      if(st&&st.done==='late'){late();return}
+      if(LIM&&st&&st.start){
+        if(left()<=0){st.done='late';save();late();return}
+        idx=st.idx||0;given=st.given||[];
+        if(idx>=qs.length){won();return}
+        showQ('Welcome back. The clock kept running.');startTick();return;
+      }
+      st=null;intro();
     })();
 
     /* side quests and private events: wording from content.js, with the same defaults as the static page */

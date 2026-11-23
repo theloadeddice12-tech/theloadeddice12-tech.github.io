@@ -287,8 +287,8 @@ function normalize(d){
     steps:(pr.steps||[]).map(function(x){return {title:x.title||'',text:x.text||''}}),
     note:pr.note||'',button:pr.button||'',message:pr.message||''};
   var pt=d.pitch||DEFAULT_PITCH;
-  d.pitch={state:['open','soon','closed'].indexOf(pt.state)>=0?pt.state:'closed',title:pt.title||'',intro:pt.intro||'',soon:pt.soon||'',successTitle:pt.successTitle||'',successText:pt.successText||'',
-    questions:(pt.questions||[]).map(function(q){return {kind:q.kind||'',text:q.text||'',salt:q.salt||'',answers:(q.answers||[]).slice(),_typed:''}})};
+  d.pitch={state:['open','soon','closed'].indexOf(pt.state)>=0?pt.state:'closed',title:pt.title||'',intro:pt.intro||'',soon:pt.soon||'',successTitle:pt.successTitle||'',successText:pt.successText||'',minutes:(pt.minutes==null?'':String(pt.minutes)),oneTry:!!pt.oneTry,round:String(pt.round||'1'),
+    questions:(pt.questions||[]).map(function(q){return {kind:q.kind||'',type:['short','choice','long'].indexOf(q.type)>=0?q.type:'short',text:q.text||'',_opts:(q.options||[]).join('\n'),salt:q.salt||'',answers:(q.answers||[]).slice(),_typed:''}})};
   d.links=Object.assign({whatsapp:'',instagram:'',email:'',phone:''},d.links||{});
   d.events=(d.events||[]).map(function(e){
     e=Object.assign({id:'',status:'closed',title:'',tagline:'',date:'',venue:'',area:'',address:'',blurb:'',description:'',
@@ -347,8 +347,8 @@ function serialize(d){
     steps:pv.steps.filter(function(x){return clean(x.title)||clean(x.text)}).map(function(x){return {title:clean(x.title),text:clean(x.text)}}),
     note:clean(pv.note),button:clean(pv.button),message:String(pv.message||'').replace(/\r/g,'').trim()};
   var pi=d.pitch;
-  out.pitch={state:pi.state,title:clean(pi.title),intro:clean(pi.intro),soon:clean(pi.soon),successTitle:clean(pi.successTitle),successText:clean(pi.successText),
-    questions:pi.questions.filter(function(q){return clean(q.text)}).map(function(q){return {kind:clean(q.kind),text:clean(q.text),salt:q.salt,answers:q.answers.slice()}})};
+  out.pitch={state:pi.state,title:clean(pi.title),intro:clean(pi.intro),soon:clean(pi.soon),successTitle:clean(pi.successTitle),successText:clean(pi.successText),minutes:Math.max(0,Math.min(30,Math.round((parseFloat(pi.minutes)||0)*10)/10)),oneTry:!!pi.oneTry,round:clean(pi.round)||'1',
+    questions:pi.questions.filter(function(q){return clean(q.text)}).map(function(q){var lg=q.type==='long';return {kind:clean(q.kind),type:q.type||'short',text:clean(q.text),options:q.type==='choice'?String(q._opts||'').split(/\n/).map(clean).filter(Boolean).slice(0,6):[],salt:lg?'':q.salt,answers:lg?[]:q.answers.slice()}})};
   var ids=postIds(d.posts);
   out.posts=d.posts.map(function(p,i){
     var body=storyToBody(p._story);
@@ -767,6 +767,7 @@ function sha256hex(t){
 function hashPitch(){
   var chain=Promise.resolve();
   state.data.pitch.questions.forEach(function(q){
+    if(q.type==='long'){q.answers=[];q._typed='';return}
     var lines=String(q._typed||'').split(/\n/).map(pitchNorm).filter(Boolean);
     if(!lines.length)return;
     if(!q.salt)q.salt=Math.random().toString(16).slice(2,10)+Math.random().toString(16).slice(2,6);
@@ -788,6 +789,14 @@ function pitchPanel(){
     textField(p,'soon','Message while Coming soon',{area:true,rows:2}),
     textField(p,'successTitle','Message when someone gets everything right',{ph:'You solved the case.'}),
     textField(p,'successText','What they should do next',{area:true,rows:3,hint:'Their name and answers go into a WhatsApp message to you, so you can check them.'})));
+  var timer=h('div',{class:'group',style:'margin-top:16px'},h('h3',{text:'The clock'}));
+  timer.appendChild(h('p',{class:'hint',text:'Give people a fixed time to answer all the questions. The questions stay hidden until they press Start, the clock keeps running if they refresh or leave, and when it hits zero the questions lock. Leave the minutes empty or 0 for no timer.'}));
+  timer.appendChild(h('div',{class:'form'},textField(p,'minutes','Time limit in minutes',{ph:'3',mode:'decimal',hint:'For example 2 or 3. Decimals work too: 1.5 is a minute and a half. Up to 30.'})));
+  var one=h('input',{type:'checkbox',checked:!!p.oneTry});
+  one.addEventListener('change',function(){p.oneTry=one.checked;touch()});
+  timer.appendChild(h('label',{class:'check',style:'margin:12px 0'},one,h('span',{text:'One try per phone or browser (after time runs out, they cannot start again)'})));
+  timer.appendChild(h('div',{class:'form'},textField(p,'round','Round number',{ph:'1',hint:'Everyone starts fresh when you change this number. Change it to 2 for a new group, or to test the clock again yourself.'})));
+  box.appendChild(timer);
   var qBox=h('div',{style:'margin-top:16px'});
   function draw(){
     qBox.textContent='';
@@ -796,10 +805,15 @@ function pitchPanel(){
       qBox.appendChild(h('div',{class:'group',style:'background:var(--ink-3);margin-bottom:14px'},
         h('h3',{text:'Question '+(i+1)}),
         textField(q,'kind','Small label',{ph:'Riddle',hint:'For example: Riddle, Tribe question.'}),
+        (function(){var ts=h('select',null,h('option',{value:'short',text:'Short answer (they type a word or a name, checked automatically)'}),h('option',{value:'choice',text:'Multiple choice (they pick one option, checked automatically)'}),h('option',{value:'long',text:'Long answer (they write freely, not checked, sent to you on WhatsApp)'}));
+          ts.value=q.type||'short';ts.addEventListener('change',function(){q.type=ts.value;touch();draw()});
+          return fieldDiv('Type of question',ts,'Long answers cannot be marked by the site. Everyone who gets the other questions right gets through, and you read the long answers yourself.')})(),
         textField(q,'text','The question',{area:true,rows:3}),
-        textField(q,'_typed','Accepted answers (one per line)',{area:true,rows:4,
-          ph:saved?'Saved and hidden ('+saved+' accepted). Type here only to replace them.':'Type every answer you will accept, one per line',
-          hint:'Add every spelling and short form you would accept, for example: Tunde Fashola, Tunde, Fashola.'}),
+        q.type==='choice'?textField(q,'_opts','Options (one per line, 2 to 6)',{area:true,rows:5,hint:'People see these as buttons, in this order.'}):null,
+        q.type==='long'?h('p',{class:'hint',text:'No answers to enter. The site accepts whatever they write and sends it to you in their WhatsApp message.'}):
+        textField(q,'_typed',q.type==='choice'?'The correct option':'Accepted answers (one per line)',{area:true,rows:q.type==='choice'?2:4,
+          ph:saved?'Saved and hidden ('+saved+' accepted). Type here only to replace them.':(q.type==='choice'?'Type the correct option exactly as written above':'Type every answer you will accept, one per line'),
+          hint:q.type==='choice'?'Type the right option exactly as it appears in the list. You can enter more than one if two options should count.':'Add every spelling and short form you would accept, for example: Tunde Fashola, Tunde, Fashola.'}),
         h('div',{class:'actions'},
           i>0?h('button',{type:'button',class:'btn ghost small',onclick:function(){p.questions.splice(i,1);p.questions.splice(i-1,0,q);touch();draw()},text:'Move up'}):null,
           h('button',{type:'button',class:'btn danger small sp',onclick:function(){
@@ -946,6 +960,13 @@ function validate(){
   var pi=d.pitch,okQ=0;
   pi.questions.forEach(function(q,i){
     if(!clean(q.text)){if(clean(q._typed)||q.answers.length)errors.push('Pitch Night question '+(i+1)+' has answers but no question.');return}
+    if(q.type==='long'){okQ++;return}
+    if(q.type==='choice'){
+      var opts=String(q._opts||'').split(/\n/).map(clean).filter(Boolean);
+      if(opts.length<2){errors.push('Pitch Night question '+(i+1)+' is multiple choice and needs at least 2 options (one per line).');return}
+      var typedN=String(q._typed||'').split(/\n/).map(pitchNorm).filter(Boolean);
+      if(typedN.length&&!typedN.some(function(a){return opts.some(function(o){return pitchNorm(o)===a})}))errors.push('Pitch Night question '+(i+1)+': the correct answer must match one of the options exactly.');
+    }
     if(!q.answers.length&&!clean(q._typed).replace(/\s/g,''))errors.push('Pitch Night question '+(i+1)+' needs at least one accepted answer.');else okQ++;
   });
   if(pi.state==='open'&&!okQ)errors.push('The Pitch Night is set to Open but has no questions.');
