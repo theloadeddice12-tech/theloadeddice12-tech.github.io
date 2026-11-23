@@ -271,21 +271,6 @@ window.SITE = {
   },
   "posts": [
     {
-      "id": "something-is-cooking",
-      "title": "Something is Cooking",
-      "date": "25 November 2026",
-      "summary": "Something is cooking at The Loaded Dice. We can't say what yet, but here is who we are and what's coming.",
-      "image": "uploads/something-is-cooking-mwt1chqf.webp",
-      "body": [
-        "It started with a smell. Something was cooking at The Loaded Dice HQ, and nobody would say what.",
-        "If you're new here, let us introduce the suspects. We are Lagos' first roving murder-mystery party. Every event is a new story in a new place. You get a tag, you join your team, you read the evidence and you question the suspects to their faces. Somebody always did it. By the end, you have to say who. Then the party begins.",
-        "No acting needed. Just sharp eyes and a good poker face.",
-        "So far, two cases are closed: The Dinner Party and Èkó After Dark. Two rooms full of liars, and the Tribe almost cracked both of them. The detectives are getting dangerous and smarter.",
-        "So we peeked into the pot. New rooms. New suspects. New ways to play. And a few surprises that we have been told, firmly, not to mention. We also take the mystery on the road. Your birthday, your office team-building or your private party can become a crime scene. Use the request-a-quote button on this site, and we'll build a case around your guests.",
-        "Want to be the first to know what's in the pot? Join the Loaded Tribe on WhatsApp. That is where the clues drop first. Trust no one. And keep your nose in the air. Signed: The M. Whistleblower"
-      ]
-    },
-    {
       "id": "a-seat-is-waiting",
       "title": "A seat is waiting",
       "date": "23 November 2026",
@@ -298,6 +283,21 @@ window.SITE = {
         "To earn a seat, you solve the case. Get every question right, then message us your idea, and we listen to every single one, we don't judge. The people we pick get the address. Everyone else only gets the rumor.",
         "There is one rule about the bar. Bring your own drink. We'll bring the chops and the secrets.",
         "The questions aren't live yet. When they are, you'll find them right here on this website, and the Loaded Tribe on WhatsApp will hear first. So join the Tribe. Keep your phone close. The chair is still empty. Whose is it going to be?"
+      ]
+    },
+    {
+      "id": "something-is-cooking",
+      "title": "Something is Cooking",
+      "date": "23 November 2026",
+      "summary": "Something is cooking at The Loaded Dice. We can't say what yet, but here is who we are and what's coming.",
+      "image": "uploads/something-is-cooking-mwt1chqf.webp",
+      "body": [
+        "It started with a smell. Something was cooking at The Loaded Dice HQ, and nobody would say what.",
+        "If you're new here, let us introduce the suspects. We are Lagos' first roving murder-mystery party. Every event is a new story in a new place. You get a tag, you join your team, you read the evidence and you question the suspects to their faces. Somebody always did it. By the end, you have to say who. Then the party begins.",
+        "No acting needed. Just sharp eyes and a good poker face.",
+        "So far, two cases are closed: The Dinner Party and Èkó After Dark. Two rooms full of liars, and the Tribe almost cracked both of them. The detectives are getting dangerous and smarter.",
+        "So we peeked into the pot. New rooms. New suspects. New ways to play. And a few surprises that we have been told, firmly, not to mention. We also take the mystery on the road. Your birthday, your office team-building or your private party can become a crime scene. Use the request-a-quote button on this site, and we'll build a case around your guests.",
+        "Want to be the first to know what's in the pot? Join the Loaded Tribe on WhatsApp. That is where the clues drop first. Trust no one. And keep your nose in the air. Signed: The M. Whistleblower"
       ]
     },
     {
