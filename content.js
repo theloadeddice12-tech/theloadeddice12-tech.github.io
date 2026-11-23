@@ -193,7 +193,7 @@ window.SITE = {
         "title": "The Pitch Night (BYOB)",
         "when": "Late January 2027",
         "where": "A private apartment in Lagos",
-        "text": "A private evening for the Loaded Tribe. Bring an idea for a story, a character, a game or a future event, and pitch it to the room. 10 to 15 people are chosen. Bring your own drink, vibe & the room picks the winners.",
+        "text": "A private evening for the Loaded Tribe. Bring an idea for a story, a character, a game or a future event, and pitch it to the room. Only a selected few are chosen. Bring your own drink, share your idea & the room picks the Tribe winners.",
         "status": "soon",
         "button": "See how to get in",
         "link": "#pitch"
