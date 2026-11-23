@@ -191,12 +191,12 @@ window.SITE = {
       {
         "tag": "Pitch night",
         "title": "The Pitch Night (BYOB)",
-        "when": "January 2027",
-        "where": "Details soon",
-        "text": "A games evening for the Loaded Tribe. Bring a murder mystery of your own, as a PDF or a slide deck, and pitch it to us. We read them all and pick the winner. You also bring your bottle and share with the tribe.",
+        "when": "Late January 2027",
+        "where": "A private apartment in Lagos",
+        "text": "A private evening for the Loaded Tribe. Bring an idea for a story, a character, a game or a future event, and pitch it to the room. 10 to 15 people are chosen. Bring your own drink, vibe & the room picks the winners.",
         "status": "soon",
-        "button": "",
-        "link": ""
+        "button": "See how to get in",
+        "link": "#pitch"
       }
     ]
   },
@@ -231,10 +231,10 @@ window.SITE = {
   "pitch": {
     "state": "soon",
     "title": "The Pitch Night",
-    "intro": "Solve the case to earn your seat. Get every answer right, then message us. We pick who comes.",
-    "soon": "The riddles open soon. Join the tribe to hear first.",
+    "intro": "Solve the case to earn your seat. Get every answer right, then message us. We pick who comes in.",
+    "soon": "The questions go live soon. Join the Loaded Tribe on WhatsApp to hear first.",
     "successTitle": "You solved the case.",
-    "successText": "Now send us a WhatsApp message with your name, and add a 30-second voice note about the murder mystery you would pitch. We will message the people we pick.",
+    "successText": "Now send us a WhatsApp message with your name, your Instagram handle and your idea in one line. Add a 30-second voice note if you like. We will message the people we pick.",
     "questions": [
       {
         "kind": "Tribe question",
