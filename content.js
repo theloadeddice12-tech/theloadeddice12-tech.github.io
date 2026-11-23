@@ -165,8 +165,8 @@ window.SITE = {
         "label": "Coming soon"
       },
       {
-        "name": "Cups",
-        "line": "Handle with care",
+        "name": "Tote Bags",
+        "line": "Hide your secrets",
         "image": "",
         "alt": "",
         "label": "Coming soon"
