@@ -229,7 +229,7 @@ window.SITE = {
     "message": "Hello Loaded Dice! I'd like a quote for a private event.\n\nOccasion:\nDate:\nNumber of guests:\nVenue (or I need you to suggest one):"
   },
   "pitch": {
-    "state": "open",
+    "state": "soon",
     "title": "The Pitch Night",
     "intro": "Solve the case to earn your seat. Get every answer right, then message us. We pick who comes in.",
     "soon": "The questions go live soon. Join the Loaded Tribe on WhatsApp to hear first.",
