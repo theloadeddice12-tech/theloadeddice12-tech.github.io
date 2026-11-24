@@ -237,7 +237,7 @@ window.SITE = {
     "successText": "Now send us a WhatsApp message with your name, your Instagram handle and your idea in one line. Add a 30-second voice note if you like. We will message the people we pick.",
     "missTitle": "",
     "missText": "",
-    "pass": 0,
+    "pass": 8,
     "minutes": 4,
     "oneTry": false,
     "round": "1",
