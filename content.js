@@ -194,7 +194,7 @@ window.SITE = {
         "when": "Late January 2027",
         "where": "To be disclosed",
         "text": "A private evening for the Loaded Tribe. Bring an idea for a story, a character, a game or a future event, and pitch it to the room. Only a selected few are chosen. Bring your own drink, share your idea & the room picks the Tribe winners.",
-        "status": "soon",
+        "status": "open",
         "button": "See how to get in",
         "link": "#pitch"
       }
