@@ -414,6 +414,19 @@ html.gate-on .dock{display:none}
 .pcard p{color:var(--muted)}
 .ptime{display:flex;align-items:center;gap:14px;margin-bottom:18px}.ptime b{font:400 30px/1 var(--f-type);color:var(--gold-hi);min-width:3.4ch;letter-spacing:.04em}.ptime span{flex:1;height:8px;background:var(--line)}.ptime i{display:block;height:100%;width:100%;background:var(--gold);transition:width .25s linear}.ptime.low b{color:var(--blood-hi)}.ptime.low i{background:var(--blood-hi)}.ptook{font:400 15px/1.2 var(--f-type);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
 .popts{display:grid;gap:10px}.popt{text-align:left;min-height:48px;padding:12px 16px;background:var(--ink-2);border:2px solid var(--line);color:var(--fg);font:500 17px/1.3 var(--f-body);cursor:pointer}.popt:hover,.popt:focus-visible{border-color:var(--gold);outline:none}.popt.bad{border-color:var(--blood-hi)}textarea.plong{flex:1 1 100%;min-height:110px;resize:vertical}
+.pscore{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:6px 0 18px}
+.pscore b{font:400 clamp(64px,13vw,104px)/.9 var(--f-display);color:var(--gold-hi)}
+.pscore b small{font-size:.42em;color:var(--muted);margin-left:.06em}
+.pscore span{font:400 14px/1.3 var(--f-type);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);padding-bottom:10px}
+.pcard .stamp{background:rgba(11,7,7,.7)}
+.pcard.won{border-top-color:var(--gold);box-shadow:0 0 0 1px rgba(214,171,82,.25),0 18px 60px rgba(214,171,82,.08)}
+.pcard.won .stamp{border-color:var(--gold);color:var(--gold-hi)}
+.pcard.miss .pscore b{color:var(--blood-hi)}
+.pcard.miss .pscore b small{color:var(--muted)}
+.pcard.miss .pq{color:var(--fg)}
+.pcard .pbtns{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:14px}
+.pskip{background:none;border:0;color:var(--muted);font:600 15px var(--f-body);text-decoration:underline;text-underline-offset:4px;cursor:pointer;min-height:44px;padding:0 4px}
+.pskip:hover,.pskip:focus-visible{color:var(--gold-hi);outline:none}
 .pdots{display:flex;gap:8px;margin-bottom:18px}
 .pdots i{display:block;width:28px;height:6px;background:var(--line)}
 .pdots i.on{background:var(--gold)}
@@ -1206,8 +1219,22 @@ ml('account','2753067');
           return Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('');
         });
       }
-      var idx=0,given=[],st=null,tick=null;
+      var idx=0,given=[],st=null,tick=null,ord=[],oo=[];
+      function ident(n){var a=[];for(var i=0;i<n;i++)a.push(i);return a}
+      function shuf(a){
+        var r=new Uint32Array(a.length),b=a.slice();
+        try{crypto.getRandomValues(r)}catch(e){for(var k=0;k<r.length;k++)r[k]=Math.floor(Math.random()*4294967295)}
+        for(var i=b.length-1;i>0;i--){var j=r[i]%(i+1),t=b[i];b[i]=b[j];b[j]=t}
+        return b;
+      }
+      function mix(){ord=shuf(ident(qs.length));oo=qs.map(function(q){return q.type==='choice'?shuf(ident(q.options.length)):null})}
+      function restore(){
+        ord=(st&&st.ord&&st.ord.length===qs.length)?st.ord:ident(qs.length);
+        oo=(st&&st.oo&&st.oo.length===qs.length)?st.oo:qs.map(function(q){return q.type==='choice'?ident(q.options.length):null});
+        right=(st&&st.right)||0;gq=(st&&st.gq)||[];sk=(st&&st.sk)||{};
+      }
       var LIM=Math.round((parseFloat(PT.minutes)||0)*60),ONE=!!PT.oneTry,USE=LIM>0||ONE;
+      var PASS=Math.max(1,Math.min(qs.length,parseInt(PT.pass,10)||qs.length)),right=0,gq=[],sk={};
       var KEY='tld_pitch_'+String(PT.round||'1');
       function load(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}}
       function save(){if(!USE||!st)return;try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
@@ -1223,44 +1250,64 @@ ml('account','2753067');
       function startTick(){
         stopTick();
         function step(){
-          if(left()<=0){stopTick();st.done='late';save();late();return}
+          if(left()<=0){stopTick();finish(true);return}
           paint();
         }
-        step();if(st&&st.done!=='late')tick=setInterval(step,250);
+        step();if(st&&!hold())tick=setInterval(step,250);
       }
-      function late(){
+      function late(){miss()}
+      function hold(){return st&&(st.done==='won'||st.done==='miss')}
+      function miss(){
         stopTick();
-        box.innerHTML='<div class="pcard"><span class="stamp">Time’s up</span><h3 class="pq">The clock ran out.</h3><p>'+(ONE?'You had one try on this phone, and it is used. If we pick you, we will message you.':'The questions locked before you finished. Take a breath and try again.')+'</p>'+(ONE?'':'<div class="pquote" style="margin-top:18px"><button class="btn" type="button" id="pretry">Try again</button></div>')+'</div>';
-        var r=$('#pretry');
-        if(r)r.addEventListener('click',function(){st=null;try{localStorage.removeItem(KEY)}catch(e){}idx=0;given=[];intro()});
+        var wa0=safeUrl(L.whatsapp)||'#join';
+        box.innerHTML='<div class="pcard miss"><span class="stamp">Case closed</span><div class="pscore"><b>'+right+'<small>/'+qs.length+'</small></b><span>answers right</span></div>'+
+          '<h3 class="pq">'+esc(PT.missTitle||'Not this time.')+'</h3>'+
+          '<p>'+esc(PT.missText||'This seat needed '+PASS+' or more. The case stays open, and so does the door: join the Loaded Tribe and you will hear first when the next Pitch Night opens.')+'</p>'+
+          '<div class="pbtns"><a class="btn" href="'+esc(wa0)+'" target="_blank" rel="noopener">Join the Loaded Tribe</a></div></div>';
+      }
+      function finish(timeout){
+        stopTick();
+        if(st&&!hold()){
+          st.took=timeout&&LIM?LIM:Math.round((Date.now()-st.start)/1000);
+          st.done=right>=PASS?'won':'miss';st.right=right;save();
+        }
+        if(right>=PASS)won();else miss();
       }
       function intro(){
         if(!LIM){begin();return}
         var mins=(LIM%60===0)?((LIM/60)+(LIM===60?' minute':' minutes')):clock(LIM);
-        box.innerHTML='<div class="pcard"><span class="stamp">Timed</span><h3 class="pq">Beat the clock.</h3><p>You have '+mins+' to answer '+qs.length+' question'+(qs.length===1?'':'s')+'. The clock starts when you press Start and it does not stop, even if you leave the page. '+(ONE?'You get one try on this phone. ':'')+'If time runs out, the questions lock.</p><div class="pquote" style="margin-top:18px"><button class="btn" type="button" id="pstart">Start the clock</button></div></div>';
+        box.innerHTML='<div class="pcard"><span class="stamp">Timed</span><h3 class="pq">Beat the clock.</h3><p>You have '+mins+' to answer '+qs.length+' question'+(qs.length===1?'':'s')+'. Get '+PASS+' or more right to earn your seat. Not sure? Skip it and come back if there is time. The clock starts when you press Start and it does not stop, even if you leave the page. You get one try on this phone, so make it count.</p><div class="pquote" style="margin-top:18px"><button class="btn" type="button" id="pstart">Start the clock</button></div></div>';
         $('#pstart').addEventListener('click',begin);
       }
       function begin(){
-        idx=0;given=[];st={start:Date.now(),idx:0,given:[],done:null};save();
+        idx=0;given=[];right=0;gq=[];sk={};mix();st={start:Date.now(),idx:0,given:[],done:null,ord:ord,oo:oo,right:0,gq:[],sk:{}};save();
         showQ();if(LIM)startTick();
       }
+      function sync(){if(st){st.idx=idx;st.given=given.slice();st.right=right;st.gq=gq.slice();st.sk=sk;st.ord=ord;save()}}
       function advance(v,note){
-        given.push(String(v).trim());idx++;
-        if(st){st.idx=idx;st.given=given.slice();save()}
-        if(idx>=qs.length)won();else{showQ(note);var n=$('#pans');if(n)n.focus({preventScroll:true})}
+        given.push(String(v).trim());gq.push(ord[idx]);right++;idx++;sync();
+        if(idx>=qs.length)finish(false);else{showQ(note);var n=$('#pans');if(n)n.focus({preventScroll:true})}
       }
-      function expired(){if(LIM&&st&&left()<=0){st.done='late';save();late();return true}return false}
+      function skip(){
+        if(expired())return;
+        var qi=ord[idx];
+        if(!sk[qi]&&idx<qs.length-1){sk[qi]=1;ord.splice(idx,1);ord.push(qi);sync();showQ('Skipped. It comes back at the end if there is time.')}
+        else if(!sk[qi]){sk[qi]=1;sync();showQ('Last one. Skip again to pass on it.')}
+        else{idx++;sync();if(idx>=qs.length)finish(false);else showQ('Passed.')}
+      }
+      function expired(){if(LIM&&st&&!hold()&&left()<=0){finish(true);return true}return false}
       function showQ(note){
-        var q=qs[idx],ty=q.type||'short';
+        var qi=ord[idx],q=qs[qi],ty=q.type||'short';
         var dots=qs.map(function(_,i){return '<i class="'+(i<idx?'on':i===idx?'cur':'')+'"></i>'}).join('');
         var ctl;
-        if(ty==='choice')ctl='<div class="popts" id="popts">'+q.options.map(function(o,i){return '<button type="button" class="popt" data-i="'+i+'">'+esc(o)+'</button>'}).join('')+'</div>';
+        if(ty==='choice')ctl='<div class="popts" id="popts">'+oo[qi].map(function(i){return '<button type="button" class="popt" data-i="'+i+'">'+esc(q.options[i])+'</button>'}).join('')+'</div>';
         else if(ty==='long')ctl='<form class="pform" id="pform" autocomplete="off"><textarea class="pans plong" id="pans" rows="4" maxlength="600" aria-label="Your answer" placeholder="Write your answer"></textarea><button class="btn" type="submit">Next</button></form>';
         else ctl='<form class="pform" id="pform" autocomplete="off"><input class="pans" id="pans" type="text" aria-label="Your answer" placeholder="Your answer" autocapitalize="off" spellcheck="false"><button class="btn" type="submit">Check</button></form>';
         box.innerHTML='<div class="pcard" id="pcard">'+(LIM?'<div class="ptime" id="ptime"><b id="pclock" aria-hidden="true"></b><span><i id="pbar"></i></span></div>':'')+'<div class="pdots" aria-hidden="true">'+dots+'</div><span class="ptag">'+esc(q.kind||'Riddle')+' '+(idx+1)+' of '+qs.length+'</span>'+
           '<h3 class="pq">'+esc(q.text)+'</h3>'+ctl+
-          '<p class="pmsg" id="pmsg" role="status" aria-live="polite">'+esc(note||'')+'</p></div>';
+          '<div class="pbtns" style="margin-top:10px"><button type="button" class="pskip" id="pskip">'+(sk[qi]?'Pass on this one':'Skip this one')+'</button></div><p class="pmsg" id="pmsg" role="status" aria-live="polite">'+esc(note||'')+'</p></div>';
         if(LIM&&st)paint();
+        $('#pskip').addEventListener('click',skip);
         var inp=$('#pans'),msg=$('#pmsg'),card=$('#pcard');
         function wrong(){msg.className='pmsg bad';msg.textContent='Not quite. Think again.';card.classList.remove('shake');void card.offsetWidth;card.classList.add('shake')}
         if(ty==='choice'){
@@ -1294,15 +1341,16 @@ ml('account','2753067');
       }
       function won(){
         stopTick();
-        if(st&&!st.done){st.done='won';if(LIM)st.took=Math.round((Date.now()-st.start)/1000);save()}
+        if(st&&!st.done){st.done='won';st.right=right;if(LIM)st.took=Math.round((Date.now()-st.start)/1000);save()}
         var took=(st&&LIM&&st.took!=null)?st.took:null;
-        box.innerHTML='<div class="pcard"><span class="stamp">Solved</span><h3 class="pq">'+esc(PT.successTitle||'You solved the case.')+'</h3>'+(took!=null?'<p class="ptook">Your time: '+clock(took)+'</p>':'')+'<p>'+esc(PT.successText||'Now send us a WhatsApp message with your name.')+'</p>'+
+        box.innerHTML='<div class="pcard won"><span class="stamp">Seat earned</span><div class="pscore"><b>'+right+'<small>/'+qs.length+'</small></b><span>answers right'+(took!=null?'<br>in '+clock(took):'')+'</span></div>'+
+          '<h3 class="pq">'+esc(PT.successTitle||'You solved the case.')+'</h3><p>'+esc(PT.successText||'Now send us a WhatsApp message with your name. We will message the people we pick.')+'</p>'+
           '<form class="pform" id="wform" style="margin-top:18px" autocomplete="off"><input class="pans" id="wname" type="text" aria-label="Your name" placeholder="Your name" autocomplete="name"></form>'+
-          '<div class="pquote" style="margin-top:18px"><a class="btn" id="wsend" href="#" target="_blank" rel="noopener">Send my answers on WhatsApp</a></div><p class="pmsg" id="wmsg" role="status" aria-live="polite"></p></div>';
+          '<div class="pbtns"><a class="btn" id="wsend" href="#" target="_blank" rel="noopener">Send my answers on WhatsApp</a></div><p class="pmsg" id="wmsg" role="status" aria-live="polite"></p></div>';
         var a=$('#wsend'),nm=$('#wname'),wm=$('#wmsg');
         $('#wform').addEventListener('submit',function(e){e.preventDefault()});
         function build(){
-          var lines=['Hello Loaded Dice! I solved the Pitch Night riddles.','','Name: '+nm.value.trim()].concat(took!=null?['Time: '+clock(took)]:[]).concat(['','My answers:']).concat(given.map(function(g,i){return (i+1)+') '+g})).concat(['','My idea in one line: ']);
+          var lines=['Hello Loaded Dice! I solved the Pitch Night riddles.','','Name: '+nm.value.trim(),'Score: '+right+'/'+qs.length].concat(took!=null?['Time: '+clock(took)]:[]).concat(['','My answers:']).concat(given.map(function(g,i){var qq=qs[gq[i]];return (i+1)+') '+(qq&&qq.type==='long'?qq.text+' - ':'')+g})).concat(['','My idea in one line: ']);
           a.href=wa(lines.join('\n'));
           if(nm.value.trim()){a.setAttribute('data-ev','pitch_solved');wm.textContent=''}else a.removeAttribute('data-ev');
         }
@@ -1310,12 +1358,11 @@ ml('account','2753067');
         a.addEventListener('click',function(e){if(!nm.value.trim()){e.preventDefault();wm.className='pmsg bad';wm.textContent='Add your name first.';nm.focus()}});
       }
       st=USE?load():null;
-      if(st&&st.done==='won'){given=st.given||[];won();return}
-      if(st&&st.done==='late'){late();return}
+      if(st&&(st.done==='won'||st.done==='miss'||st.done==='late')){given=st.given||[];idx=st.idx||0;restore();if(st.done==='won')won();else miss();return}
       if(LIM&&st&&st.start){
-        if(left()<=0){st.done='late';save();late();return}
-        idx=st.idx||0;given=st.given||[];
-        if(idx>=qs.length){won();return}
+        idx=st.idx||0;given=st.given||[];restore();
+        if(left()<=0){finish(true);return}
+        if(idx>=qs.length){finish(false);return}
         showQ('Welcome back. The clock kept running.');startTick();return;
       }
       st=null;intro();
