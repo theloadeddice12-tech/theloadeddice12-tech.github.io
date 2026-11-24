@@ -1276,7 +1276,7 @@ ml('account','2753067');
       function intro(){
         if(!LIM){begin();return}
         var mins=(LIM%60===0)?((LIM/60)+(LIM===60?' minute':' minutes')):clock(LIM);
-        box.innerHTML='<div class="pcard"><span class="stamp">Timed</span><h3 class="pq">Beat the clock.</h3><p>You have '+mins+' to answer '+qs.length+' question'+(qs.length===1?'':'s')+'. Get '+PASS+' or more right to earn your seat. Not sure? Skip it and come back if there is time. The clock starts when you press Start and it does not stop, even if you leave the page. You get one try on this phone, so make it count.</p><div class="pquote" style="margin-top:18px"><button class="btn" type="button" id="pstart">Start the clock</button></div></div>';
+        box.innerHTML='<div class="pcard"><span class="stamp">Timed</span><h3 class="pq">Beat the clock.</h3><p>You have '+mins+' to answer '+qs.length+' question'+(qs.length===1?'':'s')+'. Get '+PASS+' or more right to earn your seat. Not sure? Skip it and come back if there is time. One answer per question, and you only see your score at the end. The clock starts when you press Start and it does not stop, even if you leave the page. You get one try on this phone, so make it count.</p><div class="pquote" style="margin-top:18px"><button class="btn" type="button" id="pstart">Start the clock</button></div></div>';
         $('#pstart').addEventListener('click',begin);
       }
       function begin(){
@@ -1284,8 +1284,9 @@ ml('account','2753067');
         showQ();if(LIM)startTick();
       }
       function sync(){if(st){st.idx=idx;st.given=given.slice();st.right=right;st.gq=gq.slice();st.sk=sk;st.ord=ord;save()}}
-      function advance(v,note){
-        given.push(String(v).trim());gq.push(ord[idx]);right++;idx++;sync();
+      function advance(v,ok,note){
+        if(ok){given.push(String(v).trim());gq.push(ord[idx]);right++}
+        idx++;sync();
         if(idx>=qs.length)finish(false);else{showQ(note);var n=$('#pans');if(n)n.focus({preventScroll:true})}
       }
       function skip(){
@@ -1302,23 +1303,21 @@ ml('account','2753067');
         var ctl;
         if(ty==='choice')ctl='<div class="popts" id="popts">'+oo[qi].map(function(i){return '<button type="button" class="popt" data-i="'+i+'">'+esc(q.options[i])+'</button>'}).join('')+'</div>';
         else if(ty==='long')ctl='<form class="pform" id="pform" autocomplete="off"><textarea class="pans plong" id="pans" rows="4" maxlength="600" aria-label="Your answer" placeholder="Write your answer"></textarea><button class="btn" type="submit">Next</button></form>';
-        else ctl='<form class="pform" id="pform" autocomplete="off"><input class="pans" id="pans" type="text" aria-label="Your answer" placeholder="Your answer" autocapitalize="off" spellcheck="false"><button class="btn" type="submit">Check</button></form>';
+        else ctl='<form class="pform" id="pform" autocomplete="off"><input class="pans" id="pans" type="text" aria-label="Your answer" placeholder="Your answer" autocapitalize="off" spellcheck="false"><button class="btn" type="submit">Next</button></form>';
         box.innerHTML='<div class="pcard" id="pcard">'+(LIM?'<div class="ptime" id="ptime"><b id="pclock" aria-hidden="true"></b><span><i id="pbar"></i></span></div>':'')+'<div class="pdots" aria-hidden="true">'+dots+'</div><span class="ptag">'+esc(q.kind||'Riddle')+' '+(idx+1)+' of '+qs.length+'</span>'+
           '<h3 class="pq">'+esc(q.text)+'</h3>'+ctl+
           '<div class="pbtns" style="margin-top:10px"><button type="button" class="pskip" id="pskip">'+(sk[qi]?'Pass on this one':'Skip this one')+'</button></div><p class="pmsg" id="pmsg" role="status" aria-live="polite">'+esc(note||'')+'</p></div>';
         if(LIM&&st)paint();
         $('#pskip').addEventListener('click',skip);
         var inp=$('#pans'),msg=$('#pmsg'),card=$('#pcard');
-        function wrong(){msg.className='pmsg bad';msg.textContent='Not quite. Think again.';card.classList.remove('shake');void card.offsetWidth;card.classList.add('shake')}
-        if(ty==='choice'){
+                if(ty==='choice'){
           $$('#popts .popt').forEach(function(btn){
             btn.addEventListener('click',function(){
               if(expired())return;
               var o=q.options[+btn.getAttribute('data-i')];
               sha(q.salt+'|'+norm(o)).then(function(h){
                 if(expired())return;
-                if(q.answers.indexOf(h)>=0)advance(o,'Correct. Next one.');
-                else{btn.classList.add('bad');wrong()}
+                advance(o,q.answers.indexOf(h)>=0,'Noted. Next one.');
               });
             });
           });
@@ -1329,13 +1328,12 @@ ml('account','2753067');
           if(expired())return;
           if(ty==='long'){
             if(v.trim().length<3){msg.className='pmsg bad';msg.textContent='Write a little more first.';return}
-            advance(v,'Noted. Next one.');return;
+            advance(v,true,'Noted. Next one.');return;
           }
-          if(!norm(v)){msg.className='pmsg bad';msg.textContent='Type your answer first.';return}
+          if(!norm(v)){msg.className='pmsg bad';msg.textContent='Type your answer, or skip this one.';return}
           sha(q.salt+'|'+norm(v)).then(function(h){
             if(expired())return;
-            if(q.answers.indexOf(h)>=0)advance(v,'Correct. Next one.');
-            else{wrong();inp.select()}
+            advance(v,q.answers.indexOf(h)>=0,'Noted. Next one.');
           });
         });
       }
