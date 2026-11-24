@@ -238,7 +238,7 @@ window.SITE = {
     "missTitle": "",
     "missText": "",
     "pass": 8,
-    "minutes": 4,
+    "minutes": 2,
     "oneTry": false,
     "round": "1",
     "questions": [
