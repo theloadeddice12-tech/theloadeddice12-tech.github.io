@@ -240,7 +240,7 @@ window.SITE = {
     "pass": 8,
     "minutes": 2,
     "oneTry": false,
-    "round": "1",
+    "round": "2",
     "questions": [
       {
         "kind": "Tribe question",
