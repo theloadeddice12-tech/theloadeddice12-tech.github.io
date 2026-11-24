@@ -229,42 +229,133 @@ window.SITE = {
     "message": "Hello Loaded Dice! I'd like a quote for a private event.\n\nOccasion:\nDate:\nNumber of guests:\nVenue (or I need you to suggest one):"
   },
   "pitch": {
-    "state": "soon",
+    "state": "open",
     "title": "The Pitch Night",
     "intro": "Solve the case to earn your seat. Get every answer right, then message us. We pick who comes in.",
     "soon": "The questions go live soon. Join the Loaded Tribe on WhatsApp to hear first.",
     "successTitle": "You solved the case.",
     "successText": "Now send us a WhatsApp message with your name, your Instagram handle and your idea in one line. Add a 30-second voice note if you like. We will message the people we pick.",
+    "missTitle": "",
+    "missText": "",
+    "pass": 0,
+    "minutes": 4,
+    "oneTry": false,
+    "round": "1",
     "questions": [
       {
         "kind": "Tribe question",
+        "type": "short",
         "text": "Who killed Chief Emmanuel Okafor at The Dinner Party?",
+        "options": [],
         "salt": "dp1a9c3e",
         "answers": [
-          "1181f9547b42572f5af98e65eb7b96b10c9dc070483075a2d6ef50161de42625",
           "4d7c5e34e714286df916c85c956a2391eb68148ebe925b4e7562188b18885d70",
-          "a5f83346e4589bf80e86c6633772da99156aa632226b2f3e6c9f57db477a5a32"
+          "a5f83346e4589bf80e86c6633772da99156aa632226b2f3e6c9f57db477a5a32",
+          "1181f9547b42572f5af98e65eb7b96b10c9dc070483075a2d6ef50161de42625"
         ]
       },
       {
         "kind": "Riddle",
+        "type": "short",
         "text": "I'm at every murder, never a suspect, and always the first one taken out. Who am I?",
+        "options": [],
         "salt": "r1b72f40",
         "answers": [
-          "1d79e6c59283898031ef845aaf848e94d0521a5b7eb65725e806b78093c0cc56",
-          "3a0ec013197dff596ab8a65eb722ebad06ce30fc48784232ff128eed77b87191",
-          "7797cedc29742fea5d7c03fdfeccdfec57245c96aca65167d9cd658e9205a25f",
-          "7ef6ddd58e816dbbd0c65507c051564f2f02885856075f7cfbf644ae40fb6ff0",
-          "b6f7a2cb76e8510c4f12b8615ec159af05d9efda8ec89deb557207b42daefe8f"
+          "7ef6ddd58e816dbbd0c65507c051564f2f02885856075f7cfbf644ae40fb6ff0"
         ]
       },
       {
         "kind": "Riddle",
+        "type": "short",
         "text": "The more of me you share, the less of me there is, yet at The Loaded Dice I'm why everyone is a suspect. What am I?",
+        "options": [],
         "salt": "r2d51a8e",
         "answers": [
-          "8cad79cea7933977fb324c54d8de39fb2d6ef04dc9619e01218bf9b41bfedf11",
-          "c7beb68f5ac59e4386328dea7d038bbe057368dc459338def09c62493d0b24f0"
+          "8cad79cea7933977fb324c54d8de39fb2d6ef04dc9619e01218bf9b41bfedf11"
+        ]
+      },
+      {
+        "kind": "Trivia",
+        "type": "short",
+        "text": "Which Belgian detective is famous for his \"little grey cells\"?",
+        "options": [],
+        "salt": "1dccb9782af3",
+        "answers": [
+          "33e2ab3b1cf5e2de287177aa5fc3741243c6ac2a27cafe484569cddfa16e4ebc",
+          "4b5cc4471014f8a909acd2648a55aa4da90cc2b075e74b28d1e361c421051506"
+        ]
+      },
+      {
+        "kind": "Trivia",
+        "type": "choice",
+        "text": "What was the slogan of the cooperative at Èkó After Dark?",
+        "options": [
+          "We Are Loaded, We Are Dicey",
+          "We Are Family, We Are Together",
+          "We Are Rich, We Are Many",
+          "We Never Lose"
+        ],
+        "salt": "da4188f4ceef",
+        "answers": [
+          "239524c6706625bf0c3485a22749d69598f81266fd64b5288da6644853ccabe8"
+        ]
+      },
+      {
+        "kind": "Riddle",
+        "type": "short",
+        "text": "The guilty make me up, the innocent need me, and a good detective breaks me. What am I?",
+        "options": [],
+        "salt": "8eb5e4a02222",
+        "answers": [
+          "2754b5a8d19b818bfe78a4885e37a773db07f87e65f7c767fec693f74dcc9938"
+        ]
+      },
+      {
+        "kind": "Trivia",
+        "type": "short",
+        "text": "On a standard die, opposite faces always add up to which number?",
+        "options": [],
+        "salt": "438cce85c963",
+        "answers": [
+          "166a535f43dc2a56890b69499e8b526ff170ca6433d4d6118428f3fdd50f5fc2",
+          "afe42fc220f7c993009fc4d42b85cff3f9140850d2c155bf8feb32e2a1944e67"
+        ]
+      },
+      {
+        "kind": "Trivia",
+        "type": "choice",
+        "text": "In detective work, what does \"M.O.\" stand for?",
+        "options": [
+          "Modus operandi",
+          "Motive only",
+          "Missing object",
+          "Most obvious"
+        ],
+        "salt": "c8509804bacd",
+        "answers": [
+          "35b11afa4c196b97ae0e02d722a94152cf9f44cba9cfe4c743a57d8aa229f69f"
+        ]
+      },
+      {
+        "kind": "Riddle",
+        "type": "short",
+        "text": "I have six faces and twenty-one eyes, yet I cannot see. Load me and I'll lie for you. What am I?",
+        "options": [],
+        "salt": "edd590910456",
+        "answers": [
+          "50c5f57f93769810aa12e63bd887c040fed6c02f91a5e12a2ec0e584d40a5e39",
+          "039ca19ce8d8488d4ee89571dbe10fb0f4836b50683c92ab1d7a2526602974e5"
+        ]
+      },
+      {
+        "kind": "Trivia",
+        "type": "short",
+        "text": "Èkó After Dark happened in which Lagos neighborhood?",
+        "options": [],
+        "salt": "e51d171f00a1",
+        "answers": [
+          "f1236eeafda6ac59cee245e35ea9664147b3c239f278f84018523132f2de9700",
+          "fd02e67282230b3f584ada0281fa5332e59021dbcfdadb7b753b2788b635c8c4"
         ]
       }
     ]
